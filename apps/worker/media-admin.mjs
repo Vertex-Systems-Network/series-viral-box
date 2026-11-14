@@ -1,13 +1,40 @@
 import { createServer } from 'node:http';
+import { createLocalMedia } from './local-media.mjs';
+import { resolveFixtureGrant } from './fixture-grants.mjs';
 import pg from 'pg';
 import { handleMediaSettings } from './media-settings.mjs';
 
 const { DATABASE_URL, MEDIA_ADMIN_TOKEN, MEDIA_ADMIN_PORT = '3101' } = process.env;
 if (!DATABASE_URL || !MEDIA_ADMIN_TOKEN) throw new Error('Set DATABASE_URL and MEDIA_ADMIN_TOKEN');
+const local = process.env.MEDIA_SIGNING_KEY
+  ? createLocalMedia(process.env.FIXTURE_MEDIA_DIR ?? './var/media', process.env.MEDIA_SIGNING_KEY)
+  : null;
 const db = new pg.Pool({ connectionString: DATABASE_URL });
 
 const server = createServer(async (incoming, outgoing) => {
   try {
+    const url = new URL(incoming.url, 'http://localhost');
+    if (local && url.pathname.startsWith('/fixture-media/')) {
+      await local.serve(incoming, outgoing, url.pathname);
+      return;
+    }
+    if (local && url.pathname === '/admin/fixture-grant') {
+      const authProbe = new Request('http://localhost/admin/media-settings', {
+        method: 'OPTIONS', headers: incoming.headers,
+      });
+      if ((await handleMediaSettings(authProbe, db, MEDIA_ADMIN_TOKEN)).status === 401) {
+        return outgoing.writeHead(401).end();
+      }
+      if (incoming.method !== 'POST') return outgoing.writeHead(405, { Allow: 'POST' }).end();
+      const { titleId, locale, episodeId, kind } = Object.fromEntries(url.searchParams);
+      if (!titleId || !locale || !episodeId || !['playback', 'download'].includes(kind)) {
+        return outgoing.writeHead(400).end();
+      }
+      const grant = await resolveFixtureGrant(db, local, { titleId, locale, episodeId, kind });
+      return outgoing.writeHead(grant ? 200 : 404, {
+        'Content-Type': 'application/json', 'Cache-Control': 'no-store',
+      }).end(JSON.stringify(grant));
+    }
     if (incoming.url !== '/admin/media-settings') {
       outgoing.writeHead(404).end();
       return;
