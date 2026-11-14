@@ -184,6 +184,7 @@ save.addEventListener('click', async () => {
 
 function showAccount(user) {
   currentUser = user;
+  byId('verify-email').hidden = !user || Boolean(user.email_verified_at);
   byId('library').hidden = !user;
   save.hidden = !user;
   save.disabled = true;
@@ -283,3 +284,31 @@ byId('reset-form').addEventListener('submit', async event => {
     button.disabled = false;
   }
 });
+
+const verificationStatus = byId('verification-status');
+byId('verify-email').addEventListener('click', async event => {
+  const button = event.currentTarget;
+  button.disabled = true;
+  try {
+    const response = await fetch('/v1/account/request-verification', { method: 'POST' });
+    if (!response.ok) throw new Error();
+    verificationStatus.textContent = 'Check your inbox for the verification link.';
+  } catch {
+    verificationStatus.textContent = 'Could not send a verification link.';
+  } finally {
+    button.disabled = false;
+  }
+});
+const verifyToken = fragment.get('verify');
+if (verifyToken) {
+  history.replaceState(null, '', location.pathname + location.search);
+  fetch('/v1/account/verify-email', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: verifyToken }),
+  }).then(async response => {
+    if (!response.ok) throw new Error();
+    verificationStatus.textContent = 'Email verified.';
+    const session = await fetch('/v1/account/session');
+    if (session.ok) showAccount((await session.json()).user);
+  }).catch(() => { verificationStatus.textContent = 'Verification failed. Request a new link.'; });
+}
