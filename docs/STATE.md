@@ -55,3 +55,5 @@
 **Local delivery handoff:** Added HMAC-signed fixture media delivery and an authenticated fixture grant endpoint. Local HTTP smoke checks passed for playlist, relative HLS segment, MP4 range, scope isolation and expiry. CDN/S3 signer, browser playback and production entitlement are still open. No AI scheduling was added.
 
 **Local media integration:** The committed media delivery smoke test passed against generated fixture video and embedded PostgreSQL. It checks packaging, disk publication, DB registration, grant resolution, HLS and MP4 decoding over HTTP, range handling, and scope isolation. Browser/mobile player and live CDN remain open. No AI scheduling was added.
+
+**Blob playback handoff:** Added a reusable web hls.js adapter requiring blob attachment before loading a signed same-origin fixture HLS grant. Test double checks rejection of external URLs and non-blob attachments, and idempotent cleanup. Adapter and local HTTP integration tests passed. Next: wire the watch page to the adapter and verify playback with a real browser and CDN-backed delivery where configured.
