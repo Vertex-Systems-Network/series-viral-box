@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { createLocalMedia } from './local-media.mjs';
 import { resolveFixtureGrant } from './fixture-grants.mjs';
+import { serveFixtureWatch } from './fixture-watch-routes.mjs';
 import pg from 'pg';
 import { handleMediaSettings } from './media-settings.mjs';
 
@@ -14,6 +15,7 @@ const db = new pg.Pool({ connectionString: DATABASE_URL });
 const server = createServer(async (incoming, outgoing) => {
   try {
     const url = new URL(incoming.url, 'http://localhost');
+    if (local && await serveFixtureWatch(incoming, outgoing, url.pathname)) return;
     if (local && url.pathname.startsWith('/fixture-media/')) {
       await local.serve(incoming, outgoing, url.pathname);
       return;
