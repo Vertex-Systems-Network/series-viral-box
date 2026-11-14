@@ -128,3 +128,7 @@ Run `node scripts/collect-anamana.mjs snapshot.json` to collect up to 20 English
 ### DramaFren v2 DramaBox public title collector
 
 Run `node scripts/collect-dramafren-v2.mjs snapshot.json [PAGE_LIMIT]` (default two pages). It follows the public Next link and deduplicates titles by upstream ID and locale. Import with the existing snapshot command. The snapshot retains declared episode counts for audit. The DB importer currently persists title metadata only for this source because the catalog cards do not identify individual episodes. Keep expected episode inventory unknown pending an independently verified listing.
+
+### ReelFren selected titles across providers
+
+Run `node scripts/collect-reelfren.mjs snapshot.json PROVIDER TITLE_URL [...]`. Use the registered provider key and English ReelFren detail URLs from a single provider per snapshot. Validated routes include SixthShort and Sereal+ (registry key sereal-plus maps to route sereal). The collector shares series and episode validation with the Anamana sitemap command. Selected titles are partial provider coverage. Provider IDs with a different route or identifier format require qualification.
