@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import pg from 'pg';
 
-export async function registerFixtureMedia(db, directory, titleId, locale, episodeId) {
+export async function verifyFixturePackage(directory) {
   const manifest = JSON.parse(await readFile(join(directory, 'media.json'), 'utf8'));
   if (manifest.mp4 !== 'episode.mp4' || manifest.hls !== 'index.m3u8') {
     throw new Error('Unexpected fixture manifest paths');
@@ -25,6 +25,11 @@ export async function registerFixtureMedia(db, directory, titleId, locale, episo
     if (!file.isFile() || !file.size) throw new Error('Missing or empty HLS segment');
   }
 
+  return { checksum, files: [manifest.mp4, ...segments, manifest.hls] };
+}
+
+export async function registerFixtureMedia(db, directory, titleId, locale, episodeId) {
+  const { checksum } = await verifyFixturePackage(directory);
   await db.query(
     `INSERT INTO fixture_media_asset (source, title_id, locale, episode_id, checksum)
      VALUES ('fixture', $1, $2, $3, $4) ON CONFLICT DO NOTHING`,
