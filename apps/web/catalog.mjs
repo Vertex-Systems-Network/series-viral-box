@@ -1,0 +1,91 @@
+const byId = id => document.getElementById(id);
+const form = byId('filters');
+const status = byId('status');
+const more = byId('more');
+const titles = byId('titles');
+const details = byId('details');
+let filters = new URLSearchParams();
+let cursor;
+let listings = 0;
+let listVersion = 0;
+let detailVersion = 0;
+
+async function read(path, params = new URLSearchParams()) {
+  const response = await fetch(path + '?' + params);
+  if (!response.ok) throw new Error('Catalog request failed');
+  return response.json();
+}
+
+async function showTitle(title) {
+  const version = ++detailVersion;
+  details.hidden = true;
+  try {
+    const data = await read('/v1/title', new URLSearchParams({
+      source: title.source, locale: title.locale, id: title.id,
+    }));
+    if (version !== detailVersion) return;
+    byId('title').textContent = data.name;
+    byId('synopsis').textContent = data.synopsis;
+    byId('episodes').replaceChildren(...data.episodes.map(episode => {
+      const item = document.createElement('li');
+      item.value = episode.number;
+      item.textContent = episode.name;
+      return item;
+    }));
+    status.textContent = data.episodes.length ? '' : 'Episode list unavailable.';
+    details.hidden = false;
+    byId('title').focus();
+  } catch {
+    if (version === detailVersion) status.textContent = 'Could not load title details.';
+  }
+}
+
+async function loadTitles(reset = false) {
+  const version = ++listVersion;
+  if (reset) {
+    detailVersion++;
+    details.hidden = true;
+    filters = new URLSearchParams([...new FormData(form)].filter(([, value]) => value.trim()));
+    titles.replaceChildren();
+    cursor = null;
+    listings = 0;
+  }
+  more.disabled = true;
+  more.hidden = true;
+  status.textContent = 'Loading catalog…';
+  try {
+    const params = new URLSearchParams(filters);
+    if (cursor) params.set('cursor', cursor);
+    const result = await read('/v1/titles', params);
+    if (version !== listVersion) return;
+    for (const title of result.titles) {
+      const item = document.createElement('li');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = title.name + ' · ' + title.locale;
+      button.addEventListener('click', () => showTitle(title));
+      item.append(button);
+      titles.append(item);
+    }
+    listings += result.titles.length;
+    cursor = result.nextCursor;
+    status.textContent = listings ? '' : 'No titles match these filters.';
+  } catch {
+    if (version === listVersion) status.textContent = 'Could not load the catalog.';
+  } finally {
+    if (version === listVersion) {
+      more.disabled = false;
+      more.hidden = !cursor;
+    }
+  }
+}
+
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  loadTitles(true);
+});
+more.addEventListener('click', () => loadTitles());
+read('/v1/providers').then(({ providers }) => {
+  for (const provider of providers) form.elements.source.add(new Option(provider, provider));
+}).catch(() => {});
+loadTitles(true);
