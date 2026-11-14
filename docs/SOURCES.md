@@ -132,3 +132,7 @@ Run `node scripts/collect-dramafren-v2.mjs snapshot.json [PAGE_LIMIT]` (default 
 ### ReelFren selected titles across providers
 
 Run `node scripts/collect-reelfren.mjs snapshot.json PROVIDER TITLE_URL [...]`. Use the registered provider key and English ReelFren detail URLs from a single provider per snapshot. Validated routes include SixthShort and Sereal+ (registry key sereal-plus maps to route sereal). The collector shares series and episode validation with the Anamana sitemap command. Selected titles are partial provider coverage. Provider IDs with a different route or identifier format require qualification.
+
+### Discover ReelFren title URLs
+
+Run `node scripts/discover-reelfren.mjs discovery.json`. The command reads public English Explore links and records each registered provider's browse URL and deduplicated title links. It records unmapped provider routes for review and retains titles with nonnumeric IDs as links requiring adapter validation. Use numeric-ID title URLs with the selected-title collector where the provider route is supported. Global Explore is a partial snapshot. Providers with no title links in that snapshot remain unknown.
