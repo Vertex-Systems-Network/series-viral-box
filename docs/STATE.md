@@ -41,3 +41,5 @@
 **Provider browse handoff:** Scanned four previously unknown routes. AniBoy added 24 titles and Vigloo added 30. DramaNova yielded no matching title links and iQIYI returned HTTP 500. The saved manifest retained all 53 registry providers and recorded 1,924 title links across 51. The manifest-to-collector path verified 44 episode records from a live SixthShort title. Full per-provider pagination and media verification remain open.
 
 **Continuation rule:** Active agents advance through ready work without a user prompt after each checkpoint. The cross-session runner remains an implementation task. Its first acceptance scenario is two consecutive ready tasks resumed across separate executions with no manual continuation.
+
+**Runner handoff:** The SQLite continuation runner supports once, drain, supervise, status, pause and resume. Local process tests passed durable resumption, pause, blocked-dependency isolation and automatic dispatch to separate child processes. No hosted scheduler or live AI executor is active. Next: define the reviewed task manifest and connect the scoped AI executor and scheduler.
