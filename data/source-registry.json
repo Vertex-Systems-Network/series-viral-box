@@ -572,6 +572,426 @@
       "label": "RadReel",
       "url": "https://v2.dramafren.org/",
       "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "starshort",
+      "label": "StarShort",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "dramabite",
+      "label": "DramaBite",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "freereels",
+      "label": "FreeReels",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "fundrama",
+      "label": "FunDrama",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "microdrama",
+      "label": "MicroDrama",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "vigloo",
+      "label": "Vigloo",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "bilitv",
+      "label": "BiliTV",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "dramabox",
+      "label": "DramaBox",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "dramawave",
+      "label": "DramaWave",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "netshort",
+      "label": "NetShort",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "idrama",
+      "label": "iDrama",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "shortmax",
+      "label": "ShortMax",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "goodshort",
+      "label": "GoodShort",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "melolo",
+      "label": "Melolo",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "velolo",
+      "label": "Velolo",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "reelshort",
+      "label": "ReelShort",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "flickreels",
+      "label": "FlickReels",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "stardusttv",
+      "label": "Stardusttv",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "serialplus",
+      "label": "Serial+",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "dotdrama",
+      "label": "DotDrama",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "rapidtv",
+      "label": "RapidTV",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "shortswave",
+      "label": "ShortsWave",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "dramanova",
+      "label": "DramaNova",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "cubetv",
+      "label": "CubeTV",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "reelbuzz",
+      "label": "ReelBuzz",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "flareflow",
+      "label": "FlareFlow",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "moboreels",
+      "label": "MoboReels",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "happyshort",
+      "label": "HappyShort",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "reelife",
+      "label": "Reelife",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "pinedrama",
+      "label": "PineDrama",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "flextv",
+      "label": "FlexTV",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "reelala",
+      "label": "Reelala",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "anyreel",
+      "label": "Anyreel",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "raptdrama",
+      "label": "RaptDrama",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "bonustv",
+      "label": "BonusTV",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "minitv",
+      "label": "MiniTV",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "golddrama",
+      "label": "Gold Drama",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "iqiyi",
+      "label": "IQIYI",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "bstation",
+      "label": "Bstation",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "joyreels",
+      "label": "Joyreels",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "kalostv",
+      "label": "KalosTV",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramabos",
+      "key": "vibeshort",
+      "label": "Vibeshort",
+      "url": "https://www.dramabos.live/providers/",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "dramabox",
+      "label": "DramaBox",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "dramashorts",
+      "label": "DramaShorts",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "dreameshort",
+      "label": "DreameShort",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "flareflow",
+      "label": "FlareFlow",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "flickreels",
+      "label": "FlickReels",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "goodshort",
+      "label": "GoodShort",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "honeyreels",
+      "label": "HoneyReels",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "moboreels",
+      "label": "MoboReels",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "netshort",
+      "label": "NetShort",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "playlet",
+      "label": "Playlet",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "reelshort",
+      "label": "ReelShort",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "sereal-plus",
+      "label": "Sereal+",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "shortmax",
+      "label": "ShortMax",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "stardusttv",
+      "label": "StardustTV",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "starshort",
+      "label": "StarShort",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "topshort",
+      "label": "TopShort",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "touch-shorts",
+      "label": "Touch Shorts",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
+    },
+    {
+      "source": "where-to-watch-drama",
+      "key": "yourchannel",
+      "label": "YourChannel",
+      "url": "https://wheretowatchdrama.com/en/platforms",
+      "status": "discovered"
     }
   ]
 }
