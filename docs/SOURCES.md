@@ -93,3 +93,7 @@ The [v2 site](https://v2.dramafren.org/) has separate editorial watch pages and 
 | Official provider sites and app stores | Primary route for confirming product, publisher, region, and official catalog or partnership contact. | Map an official URL and evidence date to each discovered provider. |
 
 Treat the registry as open-ended. Track discovery, identity verification, feed qualification, metadata sync, and media eligibility per source. Measure coverage against the known inventory and record unknown or unavailable coverage explicitly. Discover new provider listings on a recurring review and enqueue qualification before enabling an import.
+
+## Registry commands
+
+The machine-readable seed is [data/source-registry.json](../data/source-registry.json). Run `node scripts/source-registry.mjs check data/source-registry.json` to validate it. To queue reviewed discoveries, provide a JSON array of objects with `source`, `key`, `label` and `url`, then run `node scripts/source-registry.mjs merge data/source-registry.json candidates.json` from one working copy. Existing identities and their status are preserved. New entries enter as discovered. Inspect the diff before committing.
