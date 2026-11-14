@@ -1,0 +1,32 @@
+name: Catalog sync
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: fixture
+          POSTGRES_DB: catalog
+        ports:
+          - 5432:5432
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: |
+          npm run sync:fixture
+          npm run sync:fixture
+          test "$(psql "$DATABASE_URL" -Atc 'SELECT count(*) FROM catalog_episode')" = 1
+        env:
+          DATABASE_URL: postgres://postgres:fixture@localhost:5432/catalog
