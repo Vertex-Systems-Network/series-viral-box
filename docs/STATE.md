@@ -39,3 +39,5 @@
 **Public discovery handoff:** Added the ReelFren Explore discovery manifest command. Live check mapped browse links for all 53 registry providers and found 1,870 title links spanning 49 providers. AniBoy, Vigloo, DramaNova and iQIYI had no title links in that snapshot. No unmapped routes appeared. Next: traverse each provider's public browse page and test the handoff from discovered titles to the episode collector.
 
 **Provider browse handoff:** Scanned four previously unknown routes. AniBoy added 24 titles and Vigloo added 30. DramaNova yielded no matching title links and iQIYI returned HTTP 500. The saved manifest retained all 53 registry providers and recorded 1,924 title links across 51. The manifest-to-collector path verified 44 episode records from a live SixthShort title. Full per-provider pagination and media verification remain open.
+
+**Continuation rule:** Active agents advance through ready work without a user prompt after each checkpoint. The cross-session runner remains an implementation task. Its first acceptance scenario is two consecutive ready tasks resumed across separate executions with no manual continuation.
