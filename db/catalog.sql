@@ -111,3 +111,21 @@ CREATE TABLE IF NOT EXISTS oauth_attempt (
   nonce text NOT NULL,
   expires_at timestamptz NOT NULL DEFAULT now() + interval '10 minutes'
 );
+
+CREATE TABLE IF NOT EXISTS viewer_bookmark (
+ user_id uuid REFERENCES app_user(id) ON DELETE CASCADE,
+ source text, title_id text, locale text,
+ saved_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY (user_id, source, title_id, locale),
+ FOREIGN KEY (source, title_id, locale) REFERENCES catalog_title
+   (source, upstream_id, locale) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS viewer_progress (
+ user_id uuid REFERENCES app_user(id) ON DELETE CASCADE,
+ source text, title_id text, locale text, episode_id text,
+ position_seconds integer NOT NULL CHECK (position_seconds >= 0),
+ updated_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY (user_id, source, title_id, locale, episode_id),
+ FOREIGN KEY (source, title_id, locale, episode_id) REFERENCES catalog_episode
+   (source, title_id, locale, upstream_id) ON DELETE CASCADE
+);
