@@ -53,3 +53,5 @@
 **Local storage and CDN settings:** Local fixture uploads default to ./var/media. S3 remains available via environment configuration. Added token-authenticated loopback API to persist or clear an optional CDN HTTPS base, and grant resolution forwards it along with scope and expiry. Four local tests and a local disk write/read/remove smoke check passed. Hosted CDN configuration, signing, asset serving and browser playback remain open. No AI scheduler was added.
 
 **Local delivery handoff:** Added HMAC-signed fixture media delivery and an authenticated fixture grant endpoint. Local HTTP smoke checks passed for playlist, relative HLS segment, MP4 range, scope isolation and expiry. CDN/S3 signer, browser playback and production entitlement are still open. No AI scheduling was added.
+
+**Local media integration:** The committed media delivery smoke test passed against generated fixture video and embedded PostgreSQL. It checks packaging, disk publication, DB registration, grant resolution, HLS and MP4 decoding over HTTP, range handling, and scope isolation. Browser/mobile player and live CDN remain open. No AI scheduling was added.
