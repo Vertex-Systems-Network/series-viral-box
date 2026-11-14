@@ -109,3 +109,10 @@ Run `node scripts/catalog-coverage.mjs` for the registry baseline check. For an 
 The registry retains the 53 user-listed ReelFren entries, 19 DramaFren provider roots, two v2 catalog paths, and three subsequently observed DramaFren candidates. It also records all 42 rows in the public [DramaBos directory](https://www.dramabos.live/providers/) and all 18 cards in the English [Where to Watch Drama directory](https://wheretowatchdrama.com/en/platforms) as individual source/provider pairs. Directory URLs are discovery evidence. DramaShorts and DreameShort are listed by the guide with catalog imports pending. All 139 source identities, including the two directory roots, are pinned in the required baseline.
 
 Keep matching app names separately under each directory. Cross-source matching needs verified provider and episode identifiers. Regional catalogs, unlisted providers, full episode inventories and media availability require independent verification. A directory record with status discovered signifies provider presence only.
+
+## Compare live DB imports
+
+After installing dependencies, run `DATABASE_URL=... node scripts/catalog-coverage.mjs expected.json --db`. The imported side is read from PostgreSQL in one query. Live adapters must use the exact registry source/key value as their source, and keep upstream title ID, episode ID and locale stable. The expected side must come from an independent upstream inventory. A homepage or trending feed is partial. DramaBos documents paginated episode lists per title and curated title feeds, so it is a candidate for a partial pilot. Its public documentation does not establish exhaustive title enumeration or a durable incremental cursor.
+
+- [DramaBos title feeds](https://www.dramabos.live/docs/feed-api/)
+- [DramaBos episode listing](https://www.dramabos.live/docs/episodes-api/)
