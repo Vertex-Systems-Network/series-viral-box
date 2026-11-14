@@ -11,6 +11,18 @@ export async function viewerLibraryResponse(db, request, site) {
   if (!user) return reply({ error: 'login_required' }, 401);
   const { method } = request;
   if (method === 'GET') {
+    if (!bookmark && url.searchParams.has('episodeId')) {
+      const identity = ['source', 'titleId', 'locale', 'episodeId'].map(key => url.searchParams.get(key));
+      if (!identity.every(value => value?.trim() && value.length <= 512)) {
+        return reply({ error: 'invalid_identity' }, 400);
+      }
+      const { rows: [entry] } = await db.query(
+        `SELECT position_seconds FROM viewer_progress
+         WHERE (user_id,source,title_id,locale,episode_id)=($1,$2,$3,$4,$5)`,
+        [user.id, ...identity],
+      );
+      return reply({ positionSeconds: entry?.position_seconds ?? 0 });
+    }
     const { rows } = bookmark ? await db.query(
       `SELECT b.source, b.title_id, b.locale, t.name, b.saved_at
        FROM viewer_bookmark b JOIN catalog_title t
