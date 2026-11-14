@@ -16,6 +16,25 @@ async function read(path, params = new URLSearchParams()) {
   return response.json();
 }
 
+async function openFixture(button, title, episode, kind, version) {
+  button.disabled = true;
+  try {
+    const params = new URLSearchParams({
+      titleId: title.id, locale: title.locale, episodeId: episode.id, kind,
+    });
+    const response = await fetch('/v1/fixture-playback?' + params, { method: 'POST' });
+    if (!response.ok) throw new Error('Media unavailable');
+    const { url } = await response.json();
+    if (version !== detailVersion) return;
+    if (kind === 'download') location.assign(url);
+    else location.assign('/fixture-watch#' + new URLSearchParams({ grant: url }));
+  } catch {
+    if (version === detailVersion) status.textContent = 'Media unavailable for this episode.';
+  } finally {
+    button.disabled = false;
+  }
+}
+
 async function showTitle(title) {
   const version = ++detailVersion;
   details.hidden = true;
@@ -30,6 +49,16 @@ async function showTitle(title) {
       const item = document.createElement('li');
       item.value = episode.number;
       item.textContent = episode.name;
+      if (data.source === 'fixture') {
+        for (const [kind, label] of [['playback', 'Watch'], ['download', 'Download']]) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = label;
+          button.setAttribute('aria-label', label + ' ' + episode.name);
+          button.addEventListener('click', () => openFixture(button, data, episode, kind, version));
+          item.append(' ', button);
+        }
+      }
       return item;
     }));
     status.textContent = data.episodes.length ? '' : 'Episode list unavailable.';
