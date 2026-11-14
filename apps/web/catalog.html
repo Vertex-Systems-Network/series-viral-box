@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Series Viral Box</title><link rel="stylesheet" href="/catalog/style.css"></head>
+<body><main>
+<h1>Series Viral Box</h1>
+<form id="filters"><label>Provider <select name="source"><option value="">All providers</option></select></label>
+<label>Language <input name="locale" placeholder="All languages"></label><button>Apply</button></form>
+<p id="status" role="status"></p><ul id="titles"></ul>
+<button id="more" type="button" hidden>Load more</button>
+<section id="details" hidden aria-labelledby="title"><h2 id="title" tabindex="-1"></h2><p id="synopsis"></p><h3>Episodes</h3><ol id="episodes"></ol></section>
+</main><script type="module" src="/catalog/page.mjs"></script></body></html>
