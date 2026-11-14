@@ -6,6 +6,7 @@ import { catalogResponse } from './catalog-api.mjs';
 import { fixtureDemoResponse } from './fixture-demo.mjs';
 import { accountResponse, sessionUser } from './accounts.mjs';
 import { oauthSettingsResponse } from './oauth-settings.mjs';
+import { oauthResponse } from './oauth-flow.mjs';
 import pg from 'pg';
 import { handleMediaSettings } from './media-settings.mjs';
 
@@ -21,6 +22,16 @@ const port = Number(MEDIA_ADMIN_PORT);
 const server = createServer(async (incoming, outgoing) => {
   try {
     const url = new URL(incoming.url, 'http://localhost');
+    if (process.env.AUTH_PUBLIC_ORIGIN && url.pathname.startsWith('/v1/oauth/') &&
+        incoming.headers.host !== new URL(process.env.AUTH_PUBLIC_ORIGIN).host) {
+      return outgoing.writeHead(403).end();
+    }
+    const oauth = await oauthResponse(db, url, incoming.method, incoming);
+    if (oauth) {
+      const headers = Object.fromEntries(oauth.headers);
+      if (oauth.headers.has('set-cookie')) headers['set-cookie'] = oauth.headers.getSetCookie();
+      return outgoing.writeHead(oauth.status, headers).end(await oauth.text());
+    }
     if (url.pathname === '/admin/users') {
       const probe = new Request('http://localhost/admin/media-settings', {
         method: 'OPTIONS', headers: incoming.headers,
@@ -58,7 +69,7 @@ const server = createServer(async (incoming, outgoing) => {
         .end(JSON.stringify({ users: rows.slice(0, 100), nextCursor: rows.length > 100 ? rows[99].id : null }));
     }
     if (['/v1/account/session', '/v1/account/login', '/v1/account/register', '/v1/account/logout'].includes(url.pathname)) {
-      const site = new URL('http://127.0.0.1:' + server.address().port);
+      const site = new URL(process.env.AUTH_PUBLIC_ORIGIN ?? 'http://127.0.0.1:' + server.address().port);
       if (incoming.headers.host !== site.host) return outgoing.writeHead(403).end();
       if (incoming.method === 'POST' && /\/(login|register)$/.test(url.pathname)) {
         const minute = Math.floor(Date.now() / 60000);
@@ -80,12 +91,12 @@ const server = createServer(async (incoming, outgoing) => {
         headers: incoming.headers,
         ...(length && incoming.method === 'POST' ? { body: Buffer.concat(chunks) } : {}),
       });
-      const account = await accountResponse(db, request, false);
+      const account = await accountResponse(db, request, site.protocol === 'https:');
       outgoing.writeHead(account.status, Object.fromEntries(account.headers));
       return outgoing.end(Buffer.from(await account.arrayBuffer()));
     }
     if (url.pathname === '/v1/fixture-playback' && local && process.env.ENABLE_FIXTURE_DEMO === '1') {
-      const site = 'http://127.0.0.1:' + server.address().port;
+      const site = process.env.AUTH_PUBLIC_ORIGIN ?? 'http://127.0.0.1:' + server.address().port;
       if (incoming.headers.origin !== site) return outgoing.writeHead(403).end();
       if (!await sessionUser(db, incoming.headers.cookie)) {
         return outgoing.writeHead(401, { 'Cache-Control': 'no-store' }).end();
