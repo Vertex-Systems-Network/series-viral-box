@@ -40,3 +40,38 @@ test('sync imports, replays, updates and preserves existing episodes', async () 
     await db.close();
   }
 });
+
+test('a failed page leaves a durable resume cursor and run history', async () => {
+  const { runSync } = await import('./run-sync.mjs');
+  const db = new PGlite();
+  try {
+    await db.exec(await readFile(new URL('../../db/catalog.sql', import.meta.url), 'utf8'));
+    const { titles } = JSON.parse(await readFile(new URL('./fixture.json', import.meta.url), 'utf8'));
+    const source = 'paged-fixture';
+    await assert.rejects(runSync(db, {
+      source,
+      async fetchPage(cursor) {
+        if (cursor === null) return { titles, nextCursor: 'page-2' };
+        return { titles: [{ ...titles[0], episodes: null }], nextCursor: null };
+      },
+    }), /Invalid title/);
+    assert.deepEqual((await db.query('SELECT cursor FROM catalog_checkpoint')).rows, [{ cursor: 'page-2' }]);
+    assert.equal((await db.query('SELECT * FROM catalog_episode')).rows.length, 1);
+
+    await runSync(db, {
+      source,
+      async fetchPage(cursor) {
+        assert.equal(cursor, 'page-2');
+        const episodes = [{ id: 'demo-2', number: 2, name: 'Second Cut' }];
+        return { titles: [{ ...titles[0], episodes }], nextCursor: null };
+      },
+    });
+    assert.deepEqual((await db.query('SELECT cursor FROM catalog_checkpoint')).rows, [{ cursor: null }]);
+    assert.deepEqual((await db.query(
+      'SELECT status, pages FROM catalog_sync_run ORDER BY started_at',
+    )).rows, [{ status: 'failed', pages: 1 }, { status: 'succeeded', pages: 1 }]);
+    assert.equal((await db.query('SELECT * FROM catalog_episode')).rows.length, 2);
+  } finally {
+    await db.close();
+  }
+});
