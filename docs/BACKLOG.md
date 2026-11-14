@@ -24,6 +24,21 @@ This table is the source of truth for task status. GitHub issues can mirror task
 | P7-03 | Planned | P7-02, P2-02 | Add recurring discovery and qualification queue. Verify a new provider listing creates one pending record, review can enable metadata-only sync, and playable/downloadable counts are reported separately. |
 | P0-03 | In review | Local Node.js workspace | Manually launched continuation supervisor. Separate task processes share leases and durable state. Pause, resumption and blocked dependency isolation tested. AI scheduling is excluded in this chat. |
 
+## Post-audit execution queue
+
+Use this queue for current task selection. The phase table above defines delivery gates. Fixture completion does not close a production phase. Draft work remains in review until merged.
+
+| ID | Status | Dependency | Acceptance evidence |
+| --- | --- | --- | --- |
+| AUD-01 | Ready | Local account APIs | Extend Chromium coverage to request and consume reset and verification links via a test mail transport. Verify revoked session and visible verified status. |
+| AUD-02 | Ready | Local media pipeline | Specify and test production playback/download entitlement, disabled viewer behavior, territory/window checks, and existing grant expiry/revocation. |
+| AUD-03 | Ready | Fixture schema | Introduce versioned migrations and test clean DB plus upgrade of existing catalog/account/asset records. |
+| AUD-04 | Ready | OAuth callback code | Test successful and rejected token exchange with fixtures, then implement explicit authenticated linking. Live provider test needs HTTPS and real credentials. |
+| AUD-05 | Ready | Registry and coverage tool | Separate discovery roots and actual provider inventories, track per-locale expected IDs and evidence, and compare catalog and media availability separately. Live completeness needs upstream exports. |
+| AUD-06 | Ready | Local storage and CDN settings | Add CDN delivery integration and test against a private fixture origin. Live verification needs configured CDN and bucket. |
+| AUD-07 | Ready | Target architecture | Finalize design spec and move fixture UI/API toward Next.js and NestJS with contract parity. Start Expo after shared contracts are stable. |
+| AUD-08 | Ready | Account recovery APIs | Add durable mail delivery, signed-in profile/password/session controls, admin UI and audit events. Live delivery needs configured sender. |
+
 ## Task card
 
 ID and goal · dependencies · owner/role and PR · scope and affected contracts · acceptance checks · evidence · blocker and next action.
