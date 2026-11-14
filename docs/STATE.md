@@ -25,3 +25,5 @@
 **Directory reconciliation:** Required baseline now pins 139 source identities, including 42 DramaBos and 18 Where to Watch Drama provider entries. This is public directory coverage. Next verify per-provider episode inventories and connect catalog exports to the coverage gate.
 
 **DB coverage handoff:** Coverage checker accepts `expected.json --db`. Embedded PostgreSQL verified real fixture writes produce the expected source/title/locale/episode identities. DramaBos documentation was reviewed for feed qualification. Complete live inventory and production access remain unverified. Next: qualify a full inventory export, implement its adapter, then run the coverage gate with that export and staging DB.
+
+**Snapshot import handoff:** Versioned JSON inventories can now be imported using the provider registry and the durable sync worker. Local embedded PostgreSQL verified a 101-title snapshot, interruption after the first page, changed-file rejection, resume and duplicate-free replay. Live snapshot access and coverage remain open. Next action: obtain a complete provider export and compare it against the staging database.
