@@ -23,3 +23,5 @@
 **Coverage handoff:** Registry contains 79 records including all 76 original entries and three newly observed candidates. Local checks verified the required-source list and exercised complete, missing, partial and unknown episode inventory cases. Live inventories and media coverage remain unverified. Next: obtain and qualify a complete provider inventory and connect adapter/DB exports to the coverage gate.
 
 **Directory reconciliation:** Required baseline now pins 139 source identities, including 42 DramaBos and 18 Where to Watch Drama provider entries. This is public directory coverage. Next verify per-provider episode inventories and connect catalog exports to the coverage gate.
+
+**DB coverage handoff:** Coverage checker accepts `expected.json --db`. Embedded PostgreSQL verified real fixture writes produce the expected source/title/locale/episode identities. DramaBos documentation was reviewed for feed qualification. Complete live inventory and production access remain unverified. Next: qualify a full inventory export, implement its adapter, then run the coverage gate with that export and staging DB.
