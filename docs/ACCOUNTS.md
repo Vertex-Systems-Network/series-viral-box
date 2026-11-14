@@ -7,7 +7,7 @@ Admin can send bearer-authenticated GET /admin/users and PATCH /admin/users?id=U
 ## Remaining user account work
 
 - Google and Apple live callback verification and explicit linking for existing accounts.
-- Email verification, signed-in password change, session management, profile and account deletion.
+- Signed-in password change, session management, profile and account deletion.
 - Watch history and progress, bookmarks, and access rules per episode.
 - Admin user search, audit events, viewer support actions and admin UI.
 - HTTPS deployment, production abuse controls, browser click-through and OAuth integration tests.
@@ -28,3 +28,7 @@ Signed-in viewers can list or save/delete bookmarks at /v1/me/bookmarks and list
 ## Password recovery
 
 Configure the HTTPS AUTH_PUBLIC_ORIGIN, an absolute SENDMAIL_PATH to a compatible mail transfer agent, and RESET_MAIL_FROM. Apply the updated schema. Users can request a link from the login dialog. Reset links expire after 20 minutes, newer requests invalidate prior links, and successful reset revokes viewer sessions. The server stores token hashes. Configure deliverability on the mail host. Mail delivery is asynchronous in the loopback web service and has no durable outbox yet.
+
+## Verify an email address
+
+With HTTPS and the same sendmail settings as password recovery, a signed-in viewer can request a link from the catalog. Verification tokens expire after 30 minutes. Resending invalidates the prior link. Confirmation consumes the token and records a verified timestamp on the account. Existing and newly created accounts can use this flow. The current fixture access policy continues to require an active session.
