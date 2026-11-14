@@ -8,6 +8,8 @@ import { accountResponse, sessionUser } from './accounts.mjs';
 import { oauthSettingsResponse } from './oauth-settings.mjs';
 import { oauthResponse } from './oauth-flow.mjs';
 import { viewerLibraryResponse } from './viewer-library.mjs';
+import { recoveryResponse } from './recovery.mjs';
+import { resetMailer } from './reset-mail.mjs';
 import pg from 'pg';
 import { handleMediaSettings } from './media-settings.mjs';
 
@@ -18,6 +20,7 @@ const local = process.env.MEDIA_SIGNING_KEY
   : null;
 const db = new pg.Pool({ connectionString: DATABASE_URL });
 
+const deliverReset = resetMailer(process.env);
 const attempts = new Map();
 const port = Number(MEDIA_ADMIN_PORT);
 const server = createServer(async (incoming, outgoing) => {
@@ -69,10 +72,10 @@ const server = createServer(async (incoming, outgoing) => {
       return outgoing.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
         .end(JSON.stringify({ users: rows.slice(0, 100), nextCursor: rows.length > 100 ? rows[99].id : null }));
     }
-    if (['/v1/account/session', '/v1/account/login', '/v1/account/register', '/v1/account/logout'].includes(url.pathname)) {
+    if (['/v1/account/session', '/v1/account/login', '/v1/account/register', '/v1/account/logout', '/v1/account/forgot-password', '/v1/account/reset-password'].includes(url.pathname)) {
       const site = new URL(process.env.AUTH_PUBLIC_ORIGIN ?? 'http://127.0.0.1:' + server.address().port);
       if (incoming.headers.host !== site.host) return outgoing.writeHead(403).end();
-      if (incoming.method === 'POST' && /\/(login|register)$/.test(url.pathname)) {
+      if (incoming.method === 'POST' && /\/(login|register|forgot-password|reset-password)$/.test(url.pathname)) {
         const minute = Math.floor(Date.now() / 60000);
         const address = incoming.socket.remoteAddress;
         for (const [key, value] of attempts) if (value.minute !== minute) attempts.delete(key);
@@ -92,7 +95,9 @@ const server = createServer(async (incoming, outgoing) => {
         headers: incoming.headers,
         ...(length && incoming.method === 'POST' ? { body: Buffer.concat(chunks) } : {}),
       });
-      const account = await accountResponse(db, request, site.protocol === 'https:');
+      const account = url.pathname.endsWith('-password')
+        ? await recoveryResponse(db, request, deliverReset)
+        : await accountResponse(db, request, site.protocol === 'https:');
       outgoing.writeHead(account.status, Object.fromEntries(account.headers));
       return outgoing.end(Buffer.from(await account.arrayBuffer()));
     }
