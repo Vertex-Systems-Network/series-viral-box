@@ -2,7 +2,7 @@
 
 ## Outcome
 
-One branded web and native mobile catalog with All Series and provider views, localization, episode playback from our CDN, and per-episode downloads where distribution is supported. Web and app use the same catalog and playback API. Admin manages sources, freshness, reconciliation, asset status and rights windows. Initial production scope is one validated source, with additional sources onboarded independently. The initial audience, languages, territories, monetization and native offline behavior remain product decisions.
+One branded web and native mobile catalog with All Series and provider views, localization, episode playback from our CDN, and per-episode downloads where distribution is supported. Web and app use the same catalog and playback API. Admin manages sources, freshness, reconciliation, asset status and rights windows. Initial production scope is one validated source, with additional sources onboarded independently. The target catalog covers every discoverable provider listed by ReelFren, DramaFren and comparable short-drama catalogs, plus providers found directly through official app and web listings. The pilot validates the pipeline before broader onboarding. The initial audience, languages, territories, monetization and native offline behavior remain product decisions.
 
 ## Architecture
 
@@ -55,3 +55,7 @@ flowchart TD
 Run typecheck/lint/build, API contract checks, migration checks, and fixture integration tests in CI. Verify retries, concurrent duplicate jobs, partial sync, failed replacement, rights expiry and takedown. Stage a full series through web and native playback and download. Verify real target browsers and iOS/Android builds before release. Establish storage and egress budgets, backup restore, release rollback, and on-call ownership before launch.
 
 See the [backlog](BACKLOG.md), [current state](STATE.md), and [design workflow](DESIGN.md).
+
+## Catalog expansion
+
+Use aggregator directories, official provider websites, and app-store publisher listings to discover providers and candidate title inventories. Record which site indexed an app and preserve provenance by source, provider, locale and upstream ID. Verify publisher identity and prefer the primary provider feed when several websites list the same content. Support scheduled discovery review, per-source incremental sync, coverage reporting, and reconciliation. Track catalog metadata including artwork, title, synopsis, episode list, language, region, update time and official viewing links. Track inventory, permission to reuse metadata/artwork, supported playback and downloadable media as independent capabilities. A source can contribute catalog records when metadata reuse is supported, and media is ingested only when a reusable file and distribution scope are verified.
