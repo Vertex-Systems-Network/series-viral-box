@@ -1,6 +1,6 @@
 # Project memory
 
-**Baseline:** Planning only. Product code, deployments and provider contracts have yet to be verified. The repository began with a placeholder README.
+**Baseline:** Planning and fixture catalog implementation. Deployments and provider contracts have yet to be verified. The repository began with a placeholder README.
 
 **Decisions:** Build web and native app with TypeScript, Next.js, Expo, NestJS, Postgres and BullMQ. Serve verified media from object storage and CDN. Keep AI implementation workflow in Git. Keep discovery source, underlying provider and media delivery status separate. One full series is the first live pilot.
 
@@ -13,3 +13,5 @@
 **Coverage decision:** The provider registry covers apps found on ReelFren, DramaFren and comparable websites and expands as new sources are discovered. The live pilot remains the first validation step. See [source candidates](SOURCES.md) and backlog tasks P7-02/P7-03.
 
 **Implementation evidence:** P0-02 registry seed now contains 76 records. Local validation passed for all records and for duplicate rejection, repeated discovery, pending status and HTTPS validation. Live feed qualification, production connectors, and database synchronization remain pending. Next action is P0-01 workspace and service bootstrap, with fixture adapter and catalog persistence to follow.
+
+**Latest handoff:** The draft PR now includes a Node.js npm workspace, a PostgreSQL fixture importer, a schema, and a catalog sync CI workflow. `npm test` passed on Node.js 24 with embedded PostgreSQL, covering replay, episode additions and edits, omission, invalid input, and transactional rollback. Standalone PostgreSQL 17 smoke-check is defined in CI and its result is unverified. npm workspaces and SQL are the initial bootstrap choices documented here. The pnpm/Prisma target, service shells, durable checkpoints, real connectors and media pipeline remain open. Next action: verify CI and add the adapter interface and sync-run records.
