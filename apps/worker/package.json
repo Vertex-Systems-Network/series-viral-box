@@ -2,5 +2,8 @@
   "name": "@series-viral-box/worker",
   "private": true,
   "type": "module",
-  "dependencies": { "pg": "^8.23.1" }
+  "dependencies": {
+    "hls.js": "^1.7.4",
+    "pg": "^8.23.1"
+  }
 }
