@@ -9,7 +9,7 @@
     "apps/*"
   ],
   "scripts": {
-    "test": "node --test apps/worker/sync.test.mjs",
+    "test": "node --test apps/worker/*.test.mjs",
     "sync:fixture": "node apps/worker/run.mjs"
   },
   "devDependencies": {
