@@ -120,3 +120,7 @@ After installing dependencies, run `DATABASE_URL=... node scripts/catalog-covera
 ## Import provider inventory snapshots
 
 Run `DATABASE_URL=... node apps/worker/run.mjs --inventory snapshot.json` with a version 1 JSON object containing `source` (an exact registry source/key) and `titles`. Each title supplies `id`, `locale`, `name`, `synopsis` and `episodes`. Each episode supplies `id`, `number` and `name`. Import commits pages of 100 titles. If interrupted, resume with the original bytes. A changed file fails the saved checkpoint check. This tool upserts catalog records and preserves existing episodes omitted by the snapshot. Use an independently obtained expected inventory for the coverage check.
+
+### ReelFren Anamana public catalog collector
+
+Run `node scripts/collect-anamana.mjs snapshot.json` to collect up to 20 English titles from the public sitemap. Pass an optional title limit to sample a smaller set. The collector checks the public watch-page episode numbers against each detail page's declared count and fails the snapshot if any selected title cannot be reconciled. Import the resulting JSON with `node apps/worker/run.mjs --inventory snapshot.json` and a configured DATABASE_URL. Treat the snapshot as partial provider coverage. Episode identities use ReelFren's displayed episode numbers scoped to the title and locale.
