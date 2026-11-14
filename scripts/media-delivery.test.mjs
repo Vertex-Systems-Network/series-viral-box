@@ -10,7 +10,7 @@ import { promisify } from 'node:util';
 import { PGlite } from '@electric-sql/pglite';
 import { syncCatalog } from '../apps/worker/sync.mjs';
 import { localFixtureStorage, publishFixtureMedia } from '../apps/worker/publish-fixture-media.mjs';
-import { resolveFixtureGrant } from '../apps/worker/fixture-grants.mjs';
+import { fixtureDemoResponse } from '../apps/worker/fixture-demo.mjs';
 import { createLocalMedia } from '../apps/worker/local-media.mjs';
 
 const run = promisify(execFile);
@@ -37,9 +37,16 @@ test('signed local delivery serves decodable HLS and MP4', { timeout: 60000 }, a
 
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     const origin = 'http://127.0.0.1:' + server.address().port;
-    const grant = async kind => origin + (await resolveFixtureGrant(db, media, {
-      titleId: 'demo-series', locale: 'en', episodeId: 'demo-1', kind,
-    })).url;
+    const endpoint = new URL('/v1/fixture-playback?titleId=demo-series&locale=en&episodeId=demo-1', origin);
+    endpoint.searchParams.set('kind', 'playback');
+    assert.equal((await fixtureDemoResponse(db, media, false, endpoint, 'POST')).status, 404);
+    assert.equal((await fixtureDemoResponse(db, media, true, endpoint, 'GET')).status, 405);
+    const grant = async kind => {
+      endpoint.searchParams.set('kind', kind);
+      const result = await fixtureDemoResponse(db, media, true, endpoint, 'POST');
+      assert.equal(result.status, 200);
+      return origin + (await result.json()).url;
+    };
     const playlist = await grant('playback');
     const mp4 = await grant('download');
     for (const url of [playlist, mp4]) {
