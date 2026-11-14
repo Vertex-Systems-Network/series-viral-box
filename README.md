@@ -36,3 +36,5 @@ Start `node apps/worker/media-admin.mjs` with DATABASE_URL and MEDIA_ADMIN_TOKEN
 - `GET /v1/title?source=fixture&locale=en&id=demo-series` returns a title and its episodes.
 
 Open `/catalog` on the loopback service to browse providers, filter by locale, page through titles, and view episode lists.
+
+For the loopback fixture demo, set `ENABLE_FIXTURE_DEMO=1` alongside `MEDIA_SIGNING_KEY` and publish the fixture media first. `/catalog` then provides Watch and Download actions for published fixture episodes. Leave the flag unset outside a local demo.
