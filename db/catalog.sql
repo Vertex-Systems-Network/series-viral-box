@@ -65,3 +65,7 @@ CREATE TABLE IF NOT EXISTS fixture_media_asset (
   FOREIGN KEY (source, title_id, locale, episode_id)
     REFERENCES catalog_episode (source, title_id, locale, upstream_id)
 );
+
+ALTER TABLE fixture_media_asset ADD COLUMN IF NOT EXISTS storage_bucket text;
+ALTER TABLE fixture_media_asset ADD COLUMN IF NOT EXISTS storage_prefix text;
+ALTER TABLE fixture_media_asset ADD COLUMN IF NOT EXISTS available_at timestamptz;
