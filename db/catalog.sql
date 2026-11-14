@@ -18,3 +18,19 @@ CREATE TABLE IF NOT EXISTS catalog_episode (
   FOREIGN KEY (source, title_id, locale)
     REFERENCES catalog_title (source, upstream_id, locale)
 );
+
+CREATE TABLE IF NOT EXISTS catalog_checkpoint (
+  source text PRIMARY KEY,
+  cursor text,
+  revision bigint NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS catalog_sync_run (
+  id uuid PRIMARY KEY,
+  source text NOT NULL,
+  status text NOT NULL CHECK (status IN ('running', 'succeeded', 'failed')),
+  pages integer NOT NULL DEFAULT 0,
+  started_at timestamptz NOT NULL DEFAULT now(),
+  finished_at timestamptz
+);
