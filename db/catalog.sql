@@ -53,3 +53,15 @@ LEFT JOIN (
   FROM catalog_sync_run WHERE status = 'succeeded' GROUP BY source
 ) success USING (source)
 LEFT JOIN catalog_checkpoint checkpoint USING (source);
+
+CREATE TABLE IF NOT EXISTS fixture_media_asset (
+  source text NOT NULL,
+  title_id text NOT NULL,
+  locale text NOT NULL,
+  episode_id text NOT NULL,
+  checksum text NOT NULL CHECK (checksum ~ '^[a-f0-9]{64}$'),
+  PRIMARY KEY (source, title_id, locale, episode_id, checksum),
+  CHECK (source = 'fixture'),
+  FOREIGN KEY (source, title_id, locale, episode_id)
+    REFERENCES catalog_episode (source, title_id, locale, upstream_id)
+);
