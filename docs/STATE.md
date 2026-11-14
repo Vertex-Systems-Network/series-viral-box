@@ -21,3 +21,5 @@
 **Source health handoff:** Added SQL health reporting, per-source session locking, abandoned-run recovery on retry, and opaque provider watermarks committed only on a successful terminal page. Three local embedded PostgreSQL tests passed. Live connector qualification, scheduled retries, admin HTTP reporting, and standalone PostgreSQL verification of the new session-lock behavior remain open. Next: qualify a documented feed and implement its incremental adapter.
 
 **Coverage handoff:** Registry contains 79 records including all 76 original entries and three newly observed candidates. Local checks verified the required-source list and exercised complete, missing, partial and unknown episode inventory cases. Live inventories and media coverage remain unverified. Next: obtain and qualify a complete provider inventory and connect adapter/DB exports to the coverage gate.
+
+**Directory reconciliation:** Required baseline now pins 139 source identities, including 42 DramaBos and 18 Where to Watch Drama provider entries. This is public directory coverage. Next verify per-provider episode inventories and connect catalog exports to the coverage gate.
