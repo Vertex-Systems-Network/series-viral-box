@@ -7,6 +7,11 @@ const details = byId('details');
 const dialog = byId('login');
 const credentials = byId('credentials');
 let pending;
+let currentUser;
+let selectedTitle;
+let libraryVersion = 0;
+const save = byId('save-title');
+const saved = byId('saved-titles');
 let filters = new URLSearchParams();
 let cursor;
 let listings = 0;
@@ -36,7 +41,7 @@ async function openFixture(button, title, episode, kind, version) {
     const { url } = await response.json();
     if (version !== detailVersion) return;
     if (kind === 'download') location.assign(url);
-    else location.assign('/fixture-watch#' + new URLSearchParams({ grant: url }));
+    else location.assign('/fixture-watch#' + new URLSearchParams({ grant: url, titleId: title.id, locale: title.locale, episodeId: episode.id }));
   } catch {
     if (version === detailVersion) status.textContent = 'Media unavailable for this episode.';
   } finally {
@@ -47,11 +52,16 @@ async function openFixture(button, title, episode, kind, version) {
 async function showTitle(title) {
   const version = ++detailVersion;
   details.hidden = true;
+  selectedTitle = undefined;
   try {
     const data = await read('/v1/title', new URLSearchParams({
       source: title.source, locale: title.locale, id: title.id,
     }));
     if (version !== detailVersion) return;
+    selectedTitle = data;
+    save.hidden = !currentUser;
+    save.disabled = true;
+    refreshLibrary();
     byId('title').textContent = data.name;
     byId('synopsis').textContent = data.synopsis;
     byId('episodes').replaceChildren(...data.episodes.map(episode => {
@@ -82,6 +92,7 @@ async function loadTitles(reset = false) {
   const version = ++listVersion;
   if (reset) {
     detailVersion++;
+    selectedTitle = undefined;
     details.hidden = true;
     filters = new URLSearchParams([...new FormData(form)].filter(([, value]) => value.trim()));
     titles.replaceChildren();
@@ -128,7 +139,56 @@ read('/v1/providers').then(({ providers }) => {
 }).catch(() => {});
 loadTitles(true);
 
+async function refreshLibrary() {
+  const version = ++libraryVersion;
+  if (!currentUser) return;
+  try {
+    const { items } = await read('/v1/me/bookmarks');
+    if (version !== libraryVersion) return;
+    saved.replaceChildren(...items.map(item => {
+      const row = document.createElement('li');
+      const button = document.createElement('button');
+      button.textContent = item.name;
+      button.addEventListener('click', () => showTitle({ ...item, id: item.title_id }));
+      row.append(button);
+      return row;
+    }));
+    const match = items.some(item => item.source === selectedTitle?.source &&
+      item.title_id === selectedTitle?.id && item.locale === selectedTitle?.locale);
+    save.dataset.saved = String(match);
+    save.textContent = match ? 'Remove from My List' : 'Save to My List';
+    save.disabled = false;
+    byId('library-status').textContent = items.length ? '' : 'No saved titles yet.';
+  } catch {
+    if (version === libraryVersion) byId('library-status').textContent = 'Could not load My List.';
+  }
+}
+
+save.addEventListener('click', async () => {
+  if (!currentUser || !selectedTitle) return;
+  const { source, id: titleId, locale } = selectedTitle;
+  save.disabled = true;
+  try {
+    const params = new URLSearchParams({ source, titleId, locale });
+    const result = await fetch('/v1/me/bookmarks?' + params, {
+      method: save.dataset.saved === 'true' ? 'DELETE' : 'PUT',
+    });
+    if (!result.ok) throw new Error();
+    await refreshLibrary();
+  } catch {
+    status.textContent = 'Could not update My List.';
+  } finally {
+    save.disabled = false;
+  }
+});
+
 function showAccount(user) {
+  currentUser = user;
+  byId('library').hidden = !user;
+  save.hidden = !user;
+  save.disabled = true;
+  if (!user) saved.replaceChildren();
+  refreshLibrary();
   byId('account').hidden = Boolean(user);
   byId('logout').hidden = !user;
 }
