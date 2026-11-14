@@ -13,7 +13,14 @@
 <button name="action" value="login">Log in</button>
 <button name="action" value="register">Register</button>
 <button id="close-login" type="button">Cancel</button>
-</form><div id="social-login"></div></dialog>
+</form><button id="forgot-password" type="button">Forgot password?</button><div id="social-login"></div></dialog>
+<dialog id="recovery"><form id="reset-form">
+<h2 id="reset-heading">Reset password</h2>
+<label id="reset-email">Email <input name="email" type="email" autocomplete="email"></label>
+<label id="reset-password" hidden>New password <input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"></label>
+<p id="reset-status" role="status"></p>
+<button id="reset-submit">Continue</button><button id="reset-close" type="button">Close</button>
+</form></dialog>
 <form id="filters"><label>Provider <select name="source"><option value="">All providers</option></select></label>
 <label>Language <input name="locale" placeholder="All languages"></label><button>Apply</button></form>
 <p id="status" role="status"></p><ul id="titles"></ul>
