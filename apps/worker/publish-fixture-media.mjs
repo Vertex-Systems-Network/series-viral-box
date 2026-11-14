@@ -1,12 +1,32 @@
 import { execFile } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { join } from 'node:path';
+import { copyFile, mkdir, rm } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import pg from 'pg';
 import { verifyFixturePackage } from './register-fixture-media.mjs';
 
 const run = promisify(execFile);
+
+export function localFixtureStorage(directory) {
+  const root = resolve(directory);
+  function pathFor(key) {
+    if (!/^fixtures\/[a-f0-9]{64}\/[a-f0-9-]{36}\/(?:episode\.mp4|index\.m3u8|segment-\d+\.ts)$/.test(key)) {
+      throw new Error('Invalid fixture storage key');
+    }
+    return join(root, key);
+  }
+  return {
+    bucket: 'local:' + root,
+    async put(key, input) {
+      const output = pathFor(key);
+      await mkdir(dirname(output), { recursive: true });
+      await copyFile(input, output);
+    },
+    async remove(key) { await rm(pathFor(key), { force: true }); },
+  };
+}
 
 export async function publishFixtureMedia(db, storage, directory, titleId, locale, episodeId) {
   const { checksum, files } = await verifyFixturePackage(directory);
@@ -63,13 +83,13 @@ export async function publishFixtureMedia(db, storage, directory, titleId, local
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [directory, titleId, locale, episodeId] = process.argv.slice(2);
-  const { DATABASE_URL, FIXTURE_MEDIA_BUCKET: bucket, FIXTURE_S3_ENDPOINT: endpoint } = process.env;
+  const { DATABASE_URL, FIXTURE_MEDIA_BUCKET: bucket, FIXTURE_S3_ENDPOINT: endpoint, FIXTURE_MEDIA_DIR = './var/media' } = process.env;
   if (!directory || !titleId || !locale || !episodeId || !DATABASE_URL ||
-      !/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/.test(bucket ?? '')) {
-    throw new Error('Set DATABASE_URL and FIXTURE_MEDIA_BUCKET and pass DIRECTORY TITLE_ID LOCALE EPISODE_ID');
+      (bucket && !/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/.test(bucket))) {
+    throw new Error('Set DATABASE_URL and pass DIRECTORY TITLE_ID LOCALE EPISODE_ID');
   }
   const flags = endpoint ? ['--endpoint-url', endpoint] : [];
-  const storage = {
+  const storage = bucket ? {
     bucket,
     put(key, path) {
       const mime = key.endsWith('.m3u8') ? 'application/vnd.apple.mpegurl' :
@@ -81,7 +101,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       return run('aws', [...flags, 's3', 'rm', 's3://' + bucket + '/' + key,
         '--only-show-errors'], { timeout: 30_000 });
     },
-  };
+  } : localFixtureStorage(FIXTURE_MEDIA_DIR);
   const client = new pg.Client({ connectionString: DATABASE_URL });
   try {
     await client.connect();
