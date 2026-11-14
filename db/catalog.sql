@@ -34,3 +34,22 @@ CREATE TABLE IF NOT EXISTS catalog_sync_run (
   started_at timestamptz NOT NULL DEFAULT now(),
   finished_at timestamptz
 );
+
+ALTER TABLE catalog_checkpoint ADD COLUMN IF NOT EXISTS watermark text;
+
+CREATE INDEX IF NOT EXISTS catalog_sync_run_source_started
+  ON catalog_sync_run (source, started_at DESC);
+
+CREATE OR REPLACE VIEW catalog_source_health AS
+SELECT latest.source, latest.status, latest.pages, latest.started_at,
+       latest.finished_at, success.last_success_at, checkpoint.cursor AS resume_cursor
+FROM (
+  SELECT DISTINCT ON (source) source, status, pages, started_at, finished_at
+  FROM catalog_sync_run
+  ORDER BY source, started_at DESC, id DESC
+) latest
+LEFT JOIN (
+  SELECT source, max(finished_at) AS last_success_at
+  FROM catalog_sync_run WHERE status = 'succeeded' GROUP BY source
+) success USING (source)
+LEFT JOIN catalog_checkpoint checkpoint USING (source);
