@@ -20,7 +20,6 @@ This table is the source of truth for task status. GitHub issues can mirror task
 | P6-01 | Planned | P2-02, P4-03, P5-02, validated live source | Run a complete live-source series pilot. Demonstrate backfill, new episode auto-publish, source failure recovery, playback and permitted download. |
 | P6-02 | Planned | P6-01 | Verify release, restore and rollback. Record operating budget, support owner and target launch coverage. |
 | P7-01 | Planned | P6-02 | Roll out additional production connectors one at a time. Require per-source evidence and verify cross-source deduplication. |
-
 | P7-02 | Planned | P0-02 | Inventory all known apps and comparable websites. Verify official publisher/site mappings, preserve cross-site provenance, and report duplicates and coverage gaps. |
 | P7-03 | Planned | P7-02, P2-02 | Add recurring discovery and qualification queue. Verify a new provider listing creates one pending record, review can enable metadata-only sync, and playable/downloadable counts are reported separately. |
 
