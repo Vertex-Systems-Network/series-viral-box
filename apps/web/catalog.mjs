@@ -4,6 +4,9 @@ const status = byId('status');
 const more = byId('more');
 const titles = byId('titles');
 const details = byId('details');
+const dialog = byId('login');
+const credentials = byId('credentials');
+let pending;
 let filters = new URLSearchParams();
 let cursor;
 let listings = 0;
@@ -23,6 +26,12 @@ async function openFixture(button, title, episode, kind, version) {
       titleId: title.id, locale: title.locale, episodeId: episode.id, kind,
     });
     const response = await fetch('/v1/fixture-playback?' + params, { method: 'POST' });
+    if (version !== detailVersion) return;
+    if (response.status === 401) {
+      pending = () => openFixture(button, title, episode, kind, version);
+      if (!dialog.open) dialog.showModal();
+      return;
+    }
     if (!response.ok) throw new Error('Media unavailable');
     const { url } = await response.json();
     if (version !== detailVersion) return;
@@ -118,3 +127,48 @@ read('/v1/providers').then(({ providers }) => {
   for (const provider of providers) form.elements.source.add(new Option(provider, provider));
 }).catch(() => {});
 loadTitles(true);
+
+function showAccount(user) {
+  byId('account').hidden = Boolean(user);
+  byId('logout').hidden = !user;
+}
+byId('account').addEventListener('click', () => dialog.showModal());
+byId('close-login').addEventListener('click', () => dialog.close());
+dialog.addEventListener('close', () => {
+  pending = undefined;
+  credentials.reset();
+  byId('account-status').textContent = '';
+});
+credentials.addEventListener('submit', async event => {
+  event.preventDefault();
+  const submitter = event.submitter;
+  if (!submitter) return;
+  const action = submitter.value;
+  const body = Object.fromEntries(new FormData(credentials));
+  const buttons = [...credentials.querySelectorAll('button')];
+  buttons.forEach(button => { button.disabled = true; });
+  try {
+    const response = await fetch('/v1/account/' + action, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new Error();
+    showAccount((await response.json()).user);
+    const next = dialog.open ? pending : undefined;
+    dialog.close();
+    next?.();
+  } catch {
+    byId('account-status').textContent = 'Could not complete this request. Check your details and try again.';
+  } finally {
+    buttons.forEach(button => { button.disabled = false; });
+  }
+});
+byId('logout').addEventListener('click', async () => {
+  try {
+    const response = await fetch('/v1/account/logout', { method: 'POST' });
+    if (!response.ok) throw new Error();
+    showAccount(null);
+  } catch {
+    status.textContent = 'Could not log out. Try again.';
+  }
+});
+fetch('/v1/account/session').then(response => response.json()).then(({ user }) => showAccount(user)).catch(() => {});
