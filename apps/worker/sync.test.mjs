@@ -75,3 +75,50 @@ test('a failed page leaves a durable resume cursor and run history', async () =>
     await db.close();
   }
 });
+
+test('recovers an interrupted run and advances its watermark only on completion', async () => {
+  const { runSync } = await import('./run-sync.mjs');
+  const db = new PGlite();
+  try {
+    await db.exec(await readFile(new URL('../../db/catalog.sql', import.meta.url), 'utf8'));
+    const source = 'incremental-fixture';
+    const run = fetchPage => runSync(db, { source, fetchPage });
+    const health = async () => (await db.query('SELECT * FROM catalog_source_health')).rows[0];
+
+    await run(async (cursor, options) => {
+      assert.equal(cursor, null);
+      assert.equal(options.watermark, null);
+      return { titles: [], nextCursor: null, watermark: 'version-1' };
+    });
+    const lastSuccess = (await health()).last_success_at;
+    await db.query(
+      "INSERT INTO catalog_sync_run (id, source, status) VALUES (gen_random_uuid(), $1, 'running')",
+      [source],
+    );
+
+    await assert.rejects(run(async (cursor, options) => {
+      assert.equal(options.watermark, 'version-1');
+      if (cursor === null) return { titles: [], nextCursor: 'delta-2' };
+      throw new Error('feed unavailable');
+    }), /feed unavailable/);
+    assert.equal((await health()).status, 'failed');
+    assert.equal((await health()).resume_cursor, 'delta-2');
+    assert.deepEqual((await health()).last_success_at, lastSuccess);
+    assert.equal((await db.query("SELECT * FROM catalog_sync_run WHERE status = 'failed'")).rows.length, 2);
+
+    await run(async (cursor, options) => {
+      assert.equal(cursor, 'delta-2');
+      assert.equal(options.watermark, 'version-1');
+      return { titles: [], nextCursor: null, watermark: 'version-2' };
+    });
+    assert.equal((await health()).status, 'succeeded');
+    assert.equal((await health()).resume_cursor, null);
+    await run(async (cursor, options) => {
+      assert.equal(cursor, null);
+      assert.equal(options.watermark, 'version-2');
+      return { titles: [], nextCursor: null };
+    });
+  } finally {
+    await db.close();
+  }
+});
