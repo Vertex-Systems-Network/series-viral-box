@@ -4,6 +4,7 @@ import { resolveFixtureGrant } from './fixture-grants.mjs';
 import { serveFixtureWatch } from './fixture-watch-routes.mjs';
 import { catalogResponse } from './catalog-api.mjs';
 import { fixtureDemoResponse } from './fixture-demo.mjs';
+import { accountResponse, sessionUser } from './accounts.mjs';
 import pg from 'pg';
 import { handleMediaSettings } from './media-settings.mjs';
 
@@ -14,9 +15,81 @@ const local = process.env.MEDIA_SIGNING_KEY
   : null;
 const db = new pg.Pool({ connectionString: DATABASE_URL });
 
+const attempts = new Map();
+const port = Number(MEDIA_ADMIN_PORT);
 const server = createServer(async (incoming, outgoing) => {
   try {
     const url = new URL(incoming.url, 'http://localhost');
+    if (url.pathname === '/admin/users') {
+      const probe = new Request('http://localhost/admin/media-settings', {
+        method: 'OPTIONS', headers: incoming.headers,
+      });
+      if ((await handleMediaSettings(probe, db, MEDIA_ADMIN_TOKEN)).status === 401) {
+        return outgoing.writeHead(401).end();
+      }
+      let rows;
+      if (incoming.method === 'GET') {
+        const cursor = url.searchParams.get('after');
+        if (cursor && !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(cursor)) {
+          return outgoing.writeHead(400).end();
+        }
+        ({ rows } = await db.query(
+          'SELECT id, email, disabled, created_at FROM app_user WHERE ($1::uuid IS NULL OR id > $1) ORDER BY id LIMIT 101',
+          [cursor],
+        ));
+      } else if (incoming.method === 'PATCH') {
+        const id = url.searchParams.get('id');
+        const disabled = url.searchParams.get('disabled');
+        if (!id || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(id) ||
+            !['true', 'false'].includes(disabled)) return outgoing.writeHead(400).end();
+        ({ rows } = await db.query(
+          `WITH updated AS (
+             UPDATE app_user SET disabled = $2 WHERE id = $1 RETURNING id, email, disabled
+           ), revoked AS (
+             DELETE FROM app_session WHERE user_id IN (SELECT id FROM updated)
+           ) SELECT * FROM updated`, [id, disabled === 'true'],
+        ));
+        if (!rows.length) return outgoing.writeHead(404).end();
+      } else {
+        return outgoing.writeHead(405, { Allow: 'GET, PATCH' }).end();
+      }
+      return outgoing.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
+        .end(JSON.stringify({ users: rows.slice(0, 100), nextCursor: rows.length > 100 ? rows[99].id : null }));
+    }
+    if (['/v1/account/session', '/v1/account/login', '/v1/account/register', '/v1/account/logout'].includes(url.pathname)) {
+      const site = new URL('http://127.0.0.1:' + server.address().port);
+      if (incoming.headers.host !== site.host) return outgoing.writeHead(403).end();
+      if (incoming.method === 'POST' && /\/(login|register)$/.test(url.pathname)) {
+        const minute = Math.floor(Date.now() / 60000);
+        const address = incoming.socket.remoteAddress;
+        for (const [key, value] of attempts) if (value.minute !== minute) attempts.delete(key);
+        const attempt = attempts.get(address) ?? { minute, count: 0 };
+        attempts.set(address, attempt);
+        if (++attempt.count > 10) return outgoing.writeHead(429).end();
+      }
+      const chunks = [];
+      let length = 0;
+      for await (const chunk of incoming.iterator({ destroyOnReturn: false })) {
+        length += chunk.length;
+        if (length > 4096) return outgoing.writeHead(413, { Connection: 'close' }).end();
+        chunks.push(chunk);
+      }
+      const request = new Request(new URL(url.pathname, site), {
+        method: incoming.method,
+        headers: incoming.headers,
+        ...(length && incoming.method === 'POST' ? { body: Buffer.concat(chunks) } : {}),
+      });
+      const account = await accountResponse(db, request, false);
+      outgoing.writeHead(account.status, Object.fromEntries(account.headers));
+      return outgoing.end(Buffer.from(await account.arrayBuffer()));
+    }
+    if (url.pathname === '/v1/fixture-playback' && local && process.env.ENABLE_FIXTURE_DEMO === '1') {
+      const site = 'http://127.0.0.1:' + server.address().port;
+      if (incoming.headers.origin !== site) return outgoing.writeHead(403).end();
+      if (!await sessionUser(db, incoming.headers.cookie)) {
+        return outgoing.writeHead(401, { 'Cache-Control': 'no-store' }).end();
+      }
+    }
     const catalog = await catalogResponse(db, url, incoming.method) ??
       await fixtureDemoResponse(db, local, process.env.ENABLE_FIXTURE_DEMO === '1', url, incoming.method);
     if (catalog) {
@@ -73,4 +146,4 @@ const server = createServer(async (incoming, outgoing) => {
     outgoing.writeHead(500).end();
   }
 });
-server.listen(Number(MEDIA_ADMIN_PORT), '127.0.0.1');
+server.listen(port, '127.0.0.1');
