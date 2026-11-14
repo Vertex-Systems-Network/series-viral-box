@@ -7,7 +7,7 @@ Admin can send bearer-authenticated GET /admin/users and PATCH /admin/users?id=U
 ## Remaining user account work
 
 - Google and Apple live callback verification and explicit linking for existing accounts.
-- Email verification, password reset/change, session management, profile and account deletion.
+- Email verification, signed-in password change, session management, profile and account deletion.
 - Watch history and progress, bookmarks, and access rules per episode.
 - Admin user search, audit events, viewer support actions and admin UI.
 - HTTPS deployment, production abuse controls, browser click-through and OAuth integration tests.
@@ -24,3 +24,7 @@ Set GOOGLE_CLIENT_SECRET or APPLE_PRIVATE_KEY out of band on the server. API res
 ## Viewer library API
 
 Signed-in viewers can list or save/delete bookmarks at /v1/me/bookmarks and list or update playback position at /v1/me/progress. Writes take source, titleId and locale query parameters. Progress also takes episodeId and position in whole seconds. GET returns up to 100 most recent records. All records are scoped to the active session's user. Browser writes require the site's configured Origin. The local catalog includes My List and the fixture watch page saves and restores position. GET progress with an episode identity returns its position directly.
+
+## Password recovery
+
+Configure the HTTPS AUTH_PUBLIC_ORIGIN, an absolute SENDMAIL_PATH to a compatible mail transfer agent, and RESET_MAIL_FROM. Apply the updated schema. Users can request a link from the login dialog. Reset links expire after 20 minutes, newer requests invalidate prior links, and successful reset revokes viewer sessions. The server stores token hashes. Configure deliverability on the mail host. Mail delivery is asynchronous in the loopback web service and has no durable outbox yet.
