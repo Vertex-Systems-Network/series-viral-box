@@ -57,3 +57,5 @@
 **Local media integration:** The committed media delivery smoke test passed against generated fixture video and embedded PostgreSQL. It checks packaging, disk publication, DB registration, grant resolution, HLS and MP4 decoding over HTTP, range handling, and scope isolation. Browser/mobile player and live CDN remain open. No AI scheduling was added.
 
 **Blob playback handoff:** Added a reusable web hls.js adapter requiring blob attachment before loading a signed same-origin fixture HLS grant. Test double checks rejection of external URLs and non-blob attachments, and idempotent cleanup. Adapter and local HTTP integration tests passed. Next: wire the watch page to the adapter and verify playback with a real browser and CDN-backed delivery where configured.
+
+**Fixture watch page:** The local service now serves a working-route fixture watch page wired to real hls.js and the blob adapter. HTTP smoke test and the two media tests passed. Chromium launch failed in this environment at its socket permission check, so actual browser playback remains unverified. Run the committed browser smoke command on a Chromium-capable host. No AI scheduling was added.
