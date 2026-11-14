@@ -19,3 +19,9 @@ After schema initialization, set DATABASE_URL and MEDIA_ADMIN_TOKEN and run `nod
 Set MEDIA_SIGNING_KEY to a secret of at least 32 bytes and start the loopback media admin service. With an admin bearer token, POST to `/admin/fixture-grant?titleId=demo-series&locale=en&episodeId=demo-1&kind=playback`. Use kind=download for the MP4 attachment. Resolve the returned relative URL against the media service origin. HLS segments use the same signed path prefix as the playlist. The media route supports GET, HEAD and single byte ranges. The local signer applies only to assets published to the configured local disk directory.
 
 Run the full local media smoke test with `node --test scripts/media-delivery.test.mjs` after installing dependencies and FFmpeg. It packages generated video, publishes it to disk, registers the storage location in embedded PostgreSQL, resolves grants, and decodes HLS and MP4 over HTTP.
+
+## Web blob playback
+
+The reusable web adapter is `attachBlobPlayback(video, Hls, grantUrl)` in apps/web/blob-playback.mjs. Pass a client-side hls.js constructor and the signed same-origin playback grant. Call the returned cleanup when leaving the page or switching episodes. The adapter requires MediaSource blob attachment and reports unsupported browsers or fatal HLS errors. Its current path contract is the local fixture route. Keep the upstream provider and object-storage URLs server-side. Browser networking can still show the app's temporary playlist and segment requests. The download grant remains a separate MP4 attachment.
+
+Run `node --test apps/web/blob-playback.test.mjs scripts/media-delivery.test.mjs`. This verifies adapter behavior with a test double and HTTP decoding with FFmpeg. The production watch-page integration, real browser MSE test, and CDN-backed same-origin route remain pending.
