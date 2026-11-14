@@ -20,7 +20,7 @@ export async function sessionUser(db, cookie) {
   const token = tokenFrom(cookie);
   if (!token) return null;
   const { rows } = await db.query(
-    `SELECT u.id, u.email FROM app_session s JOIN app_user u ON u.id = s.user_id
+    `SELECT u.id, u.email, u.email_verified_at FROM app_session s JOIN app_user u ON u.id = s.user_id
      WHERE s.token_hash = $1 AND s.expires_at > now() AND NOT u.disabled`, [hashToken(token)],
   );
   return rows[0] ?? null;
