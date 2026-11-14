@@ -79,3 +79,5 @@
 **Viewer library UI:** Connected My List, Save/Remove, and per-episode resume and progress saving to the local catalog and fixture player. Local HTTP and signed delivery smoke tests passed. Browser click-through with an authenticated session and saved position still needs verification. Next: run catalog and account browser coverage, then add account recovery.
 
 **Browser account verification:** [Hosted Chromium CI](https://github.com/wpessential/series-viral-box/actions/runs/43551362552) passed the fixture catalog → Watch → registration dialog → playback sequence, My List save/remove, and saved-position resume with same-origin blob playback. The harness uses live handlers with an embedded database. Catalog sync and registry checks passed on the same commit. Next: email verification and account recovery.
+
+**Recovery handoff:** Added password reset UI, 20-minute single-use token hashes, password update and session revocation, with a configured sendmail transport. Local worker integration tests passed. Live email delivery, browser reset flow, a durable mail outbox and email verification remain open.
