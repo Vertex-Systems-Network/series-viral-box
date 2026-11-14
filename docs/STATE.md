@@ -75,3 +75,5 @@
 **OAuth flow handoff:** Added Google and Apple authorization, browser-bound callback state, nonce and signed ID-token validation, persisted provider identities, and gated catalog links. Seven existing tests and an OAuth state/cancellation/replay test passed. Live OAuth, successful token exchange verification, and explicit linking to an existing email account remain pending.
 
 **Viewer library handoff:** Added PostgreSQL bookmarks and watch position with session-scoped endpoints. Local PostgreSQL-compatible smoke test verified login enforcement, cross-origin write rejection, per-account isolation, bookmark replay/deletion, position updates and missing episodes. Next: wire Save/Remove and position resume to catalog/watch pages; add full account recovery and viewer settings.
+
+**Viewer library UI:** Connected My List, Save/Remove, and per-episode resume and progress saving to the local catalog and fixture player. Local HTTP and signed delivery smoke tests passed. Browser click-through with an authenticated session and saved position still needs verification. Next: run catalog and account browser coverage, then add account recovery.
