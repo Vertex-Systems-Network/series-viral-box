@@ -1,8 +1,12 @@
 # Series Viral Box implementation plan
 
+## Current baseline
+
+The draft implementation uses npm workspaces and a lean Node.js loopback service with PostgreSQL. Next.js, Expo, NestJS, Prisma and the queue-backed worker below are target components. Local disk is the default media store. Object storage and CDN delivery are optional configuration. Web playback uses a blob URL backed by signed same-origin HLS. Treat public source discovery and complete production media rights as separate dependencies. See the [audit](AUDIT.md), [current state](STATE.md) and post-audit backlog for verification and rollout order.
+
 ## Outcome
 
-One branded web and native mobile catalog with All Series and provider views, localization, episode playback from our CDN, and per-episode downloads where distribution is supported. Web and app use the same catalog and playback API. Admin manages sources, freshness, reconciliation, asset status and rights windows. Initial production scope is one validated source, with additional sources onboarded independently. The target catalog covers every discoverable provider listed by ReelFren, DramaFren and comparable short-drama catalogs, plus providers found directly through official app and web listings. The pilot validates the pipeline before broader onboarding. The initial audience, languages, territories, monetization and native offline behavior remain product decisions.
+One branded web and native mobile catalog with All Series and provider views, localization, episode playback from our local media origin or configured CDN, and per-episode downloads where distribution is supported. Web and app use the same catalog and playback API. Admin manages sources, freshness, reconciliation, asset status and rights windows. Initial production scope is one validated source, with additional sources onboarded independently. The target catalog covers every discoverable provider listed by ReelFren, DramaFren and comparable short-drama catalogs, plus providers found directly through official app and web listings. The pilot validates the pipeline before broader onboarding. The initial audience, languages, territories, monetization and native offline behavior remain product decisions.
 
 ## Architecture
 
@@ -15,7 +19,7 @@ One branded web and native mobile catalog with All Series and provider views, lo
 | Background processing | Redis + BullMQ worker | Catalog sync, retries, outbox dispatch, media ingest and reconciliation |
 | Media | FFmpeg, S3-compatible storage and CDN | Validation, HLS renditions, downloadable MP4 when allowed |
 
-Use a TypeScript pnpm workspace with apps/web, apps/mobile, apps/api and apps/worker. Share generated API client, schema and tokens. Keep platform-specific view and player implementations in their apps. Start with PostgreSQL search and containerized services. Hosting vendor and production budgets remain open. AI drives development and design. Runtime catalog and media decisions use deterministic code.
+Target a TypeScript workspace with apps/web, apps/mobile, apps/api and apps/worker. Share generated API client, schema and tokens. Keep platform-specific view and player implementations in their apps. Start with PostgreSQL search and containerized services. Hosting vendor and production budgets remain open. AI drives development and design. Runtime catalog and media decisions use deterministic code.
 
 ## Source boundaries
 
