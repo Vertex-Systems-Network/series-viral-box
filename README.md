@@ -26,3 +26,11 @@ The adapter contract is `{ source, fetchPage(cursor) }`. Each page returns `{ ti
 Adapters receive `fetchPage(cursor, { watermark })`. A provider that supports incremental changes may return an opaque watermark on its final page. The checkpoint retains the previous watermark through partial runs. Use a dedicated database connection for `runSync`. A session lock prevents concurrent workers on separate connections for the same source. On its next run, the worker marks abandoned runs failed and resumes the committed checkpoint.
 
 Inspect source health with `SELECT * FROM catalog_source_health ORDER BY source;`. The view reports the most recent run, last successful completion and pending resume cursor for each attempted source.
+
+## Read the local catalog
+
+Start `node apps/worker/media-admin.mjs` with DATABASE_URL and MEDIA_ADMIN_TOKEN after initializing the schema. The loopback service provides read-only endpoints:
+
+- `GET /v1/providers` lists source keys present in the database.
+- `GET /v1/titles?source=fixture&locale=en&limit=20` lists titles. Pass the returned nextCursor with the same filters to continue.
+- `GET /v1/title?source=fixture&locale=en&id=demo-series` returns a title and its episodes.
