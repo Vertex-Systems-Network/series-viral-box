@@ -7,6 +7,7 @@ import { fixtureDemoResponse } from './fixture-demo.mjs';
 import { accountResponse, sessionUser } from './accounts.mjs';
 import { oauthSettingsResponse } from './oauth-settings.mjs';
 import { oauthResponse } from './oauth-flow.mjs';
+import { viewerLibraryResponse } from './viewer-library.mjs';
 import pg from 'pg';
 import { handleMediaSettings } from './media-settings.mjs';
 
@@ -101,6 +102,12 @@ const server = createServer(async (incoming, outgoing) => {
       if (!await sessionUser(db, incoming.headers.cookie)) {
         return outgoing.writeHead(401, { 'Cache-Control': 'no-store' }).end();
       }
+    }
+    const viewerOrigin = process.env.AUTH_PUBLIC_ORIGIN ?? 'http://127.0.0.1:' + server.address().port;
+    const library = await viewerLibraryResponse(db, incoming, viewerOrigin);
+    if (library) {
+      outgoing.writeHead(library.status, Object.fromEntries(library.headers));
+      return outgoing.end(await library.text());
     }
     const catalog = await catalogResponse(db, url, incoming.method) ??
       await fixtureDemoResponse(db, local, process.env.ENABLE_FIXTURE_DEMO === '1', url, incoming.method);
