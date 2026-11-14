@@ -56,7 +56,9 @@ try {
     await page.waitForFunction(() => document.querySelector('video').currentTime > 0.25);
     assert.match(await page.locator('video').evaluate(video => video.currentSrc), /^blob:/);
     assert.ok(requests.some(url => url.endsWith('/segment-00000.ts')));
-    assert.ok(requests.every(url => url.startsWith(origin + '/')));
+    const external = requests.map(url => new URL(url)).filter(url => url.origin !== origin);
+    assert.deepEqual(external.map(url => url.protocol + '//' + url.host), [],
+      'Playback should use the fixture origin for network and blob URLs');
     console.log('Chromium rendered fixture video through blob playback and same-origin requests');
   }
 } finally {
