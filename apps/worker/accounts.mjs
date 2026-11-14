@@ -24,8 +24,6 @@ export async function sessionUser(db, cookie) {
 export async function accountResponse(db, request, secure = true) {
   const action = new URL(request.url).pathname.split('/').at(-1);
   const cookie = request.headers.get('cookie');
-  const cookieHeader = (token, age) =>
-    `svb_session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${age}${secure ? '; Secure' : ''}`;
   if (action === 'session' && request.method === 'GET') return reply({ user: await sessionUser(db, cookie) });
   if (request.method !== 'POST') return reply({ error: 'method_not_allowed' }, 405);
   if (request.headers.get('origin') !== new URL(request.url).origin) return reply({ error: 'invalid_origin' }, 403);
@@ -33,7 +31,7 @@ export async function accountResponse(db, request, secure = true) {
   if (action === 'logout') {
     const token = tokenFrom(cookie);
     if (token) await db.query('DELETE FROM app_session WHERE token_hash = $1', [hashToken(token)]);
-    return reply({ user: null }, 200, { 'Set-Cookie': cookieHeader('', 0) });
+    return reply({ user: null }, 200, { 'Set-Cookie': sessionCookie('', 0, secure) });
   }
   if (!['login', 'register'].includes(action)) return reply({ error: 'not_found' }, 404);
   const body = await request.json().catch(() => null);
@@ -59,12 +57,20 @@ export async function accountResponse(db, request, secure = true) {
     const record = rows[0];
     const [salt, digest] = (record?.password_hash ?? ('0'.repeat(32) + ':' + '0'.repeat(128))).split(':');
     const valid = timingSafeEqual(await derive(password, salt, 64), Buffer.from(digest, 'hex'));
-    if (!valid || !record || record.disabled) return reply({ error: 'invalid_credentials' }, 401);
+    if (!valid || !record?.password_hash || record.disabled) return reply({ error: 'invalid_credentials' }, 401);
     user = { id: record.id, email: record.email };
   }
 
+  return createAccountSession(db, user, secure);
+}
+
+function sessionCookie(token, age, secure) {
+  return `svb_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${age}${secure ? '; Secure' : ''}`;
+}
+
+export async function createAccountSession(db, user, secure) {
   const token = randomBytes(32).toString('hex');
   await db.query('INSERT INTO app_session VALUES ($1, $2, now() + $3 * interval \'1 second\')',
     [hashToken(token), user.id, lifetime]);
-  return reply({ user }, 200, { 'Set-Cookie': cookieHeader(token, lifetime) });
+  return reply({ user }, 200, { 'Set-Cookie': sessionCookie(token, lifetime, secure) });
 }
