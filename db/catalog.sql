@@ -88,3 +88,11 @@ CREATE TABLE IF NOT EXISTS app_session (
   expires_at timestamptz NOT NULL
 );
 CREATE INDEX IF NOT EXISTS app_session_expiry ON app_session(expires_at);
+
+CREATE TABLE IF NOT EXISTS oauth_provider_settings (
+  provider text PRIMARY KEY CHECK (provider IN ('google', 'apple')),
+  enabled boolean NOT NULL DEFAULT false,
+  client_id text,
+  team_id text,
+  key_id text
+);
