@@ -243,3 +243,43 @@ fetch('/v1/oauth/providers').then(response => response.json()).then(({ providers
     byId('social-login').append(link, document.createElement('br'));
   }
 }).catch(() => {});
+
+const recovery = byId('recovery');
+const fragment = new URLSearchParams(location.hash.slice(1));
+const resetToken = fragment.get('reset');
+if (resetToken) {
+  history.replaceState(null, '', location.pathname + location.search);
+  byId('reset-email').hidden = true;
+  byId('reset-password').hidden = false;
+  recovery.showModal();
+}
+byId('forgot-password').addEventListener('click', () => {
+  dialog.close();
+  recovery.showModal();
+});
+byId('reset-close').addEventListener('click', () => recovery.close());
+byId('reset-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const values = Object.fromEntries(new FormData(event.currentTarget));
+  const button = byId('reset-submit');
+  button.disabled = true;
+  try {
+    const response = await fetch('/v1/account/' + (resetToken ? 'reset-password' : 'forgot-password'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(resetToken ? { token: resetToken, password: values.password } : { email: values.email }),
+    });
+    if (!response.ok) throw new Error();
+    if (resetToken) {
+      recovery.close();
+      showAccount(null);
+      dialog.showModal();
+      byId('account-status').textContent = 'Password updated. Log in with your new password.';
+    } else {
+      byId('reset-status').textContent = 'If the account is eligible, a reset link will arrive by email.';
+    }
+  } catch {
+    byId('reset-status').textContent = 'Could not complete password recovery. Check your details or request a new link.';
+  } finally {
+    button.disabled = false;
+  }
+});
