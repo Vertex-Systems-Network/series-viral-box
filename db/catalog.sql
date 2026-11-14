@@ -96,3 +96,18 @@ CREATE TABLE IF NOT EXISTS oauth_provider_settings (
   team_id text,
   key_id text
 );
+
+ALTER TABLE app_user ALTER COLUMN password_hash DROP NOT NULL;
+CREATE TABLE IF NOT EXISTS oauth_identity (
+  provider text NOT NULL,
+  subject text NOT NULL,
+  user_id uuid NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  PRIMARY KEY (provider, subject)
+);
+CREATE TABLE IF NOT EXISTS oauth_attempt (
+  state text PRIMARY KEY,
+  provider text NOT NULL,
+  browser_hash text NOT NULL,
+  nonce text NOT NULL,
+  expires_at timestamptz NOT NULL DEFAULT now() + interval '10 minutes'
+);
