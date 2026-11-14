@@ -6,6 +6,10 @@ After importing the fixture catalog, set DATABASE_URL and run `node apps/worker/
 
 ## Publish fixture assets to object storage
 
-Use AWS CLI credentials scoped to a private fixture bucket. Set DATABASE_URL and FIXTURE_MEDIA_BUCKET. Set FIXTURE_S3_ENDPOINT when using an S3-compatible endpoint. Initialize the fixture schema and episode through the fixture catalog command first, then run `node apps/worker/publish-fixture-media.mjs DIRECTORY demo-series en demo-1`.
+By default the publisher writes to local disk under ./var/media or FIXTURE_MEDIA_DIR. Set DATABASE_URL. For optional S3 uploads, set FIXTURE_MEDIA_BUCKET and use AWS CLI credentials scoped to a private fixture bucket. Set FIXTURE_S3_ENDPOINT when using an S3-compatible endpoint. Initialize the fixture schema and episode through the fixture catalog command first, then run `node apps/worker/publish-fixture-media.mjs DIRECTORY demo-series en demo-1`.
 
 Publication writes into an attempt-specific object prefix and sets available_at only after every upload succeeds. Repeated publication to the same bucket returns the existing prefix. On upload failure, the worker attempts to remove that attempt's objects. If the database result is ambiguous, objects are retained for reconciliation because the database may have already published that prefix. Use the storage_bucket and storage_prefix fields to identify published objects. This fixture command does not grant public access.
+
+## Configure optional CDN delivery
+
+After schema initialization, set DATABASE_URL and MEDIA_ADMIN_TOKEN and run `node apps/worker/media-admin.mjs`. The service listens on loopback port 3101 by default. Send an authenticated GET or PUT to /admin/media-settings. PUT accepts a JSON body such as `{"cdnBaseUrl":"https://cdn.example.com/media/"}` or `{"cdnBaseUrl":null}` to clear it. Configure the CDN origin with your CDN provider. This setting passes the delivery base to the grant signer. It does not provision DNS, upload credentials, or a CDN distribution. A signer and media-serving route are still needed for browser playback. The HLS grant requests prefix scope for its playlist and segments. MP4 requests exact-object scope.
