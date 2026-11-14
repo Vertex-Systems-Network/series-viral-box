@@ -129,3 +129,9 @@ CREATE TABLE IF NOT EXISTS viewer_progress (
  FOREIGN KEY (source, title_id, locale, episode_id) REFERENCES catalog_episode
    (source, title_id, locale, upstream_id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS password_reset (
+  user_id uuid PRIMARY KEY REFERENCES app_user(id) ON DELETE CASCADE,
+  token_hash text NOT NULL UNIQUE,
+  expires_at timestamptz NOT NULL
+);
