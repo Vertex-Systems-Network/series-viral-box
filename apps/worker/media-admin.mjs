@@ -3,6 +3,7 @@ import { createLocalMedia } from './local-media.mjs';
 import { resolveFixtureGrant } from './fixture-grants.mjs';
 import { serveFixtureWatch } from './fixture-watch-routes.mjs';
 import { catalogResponse } from './catalog-api.mjs';
+import { fixtureDemoResponse } from './fixture-demo.mjs';
 import pg from 'pg';
 import { handleMediaSettings } from './media-settings.mjs';
 
@@ -16,7 +17,8 @@ const db = new pg.Pool({ connectionString: DATABASE_URL });
 const server = createServer(async (incoming, outgoing) => {
   try {
     const url = new URL(incoming.url, 'http://localhost');
-    const catalog = await catalogResponse(db, url, incoming.method);
+    const catalog = await catalogResponse(db, url, incoming.method) ??
+      await fixtureDemoResponse(db, local, process.env.ENABLE_FIXTURE_DEMO === '1', url, incoming.method);
     if (catalog) {
       outgoing.writeHead(catalog.status, Object.fromEntries(catalog.headers));
       outgoing.end(Buffer.from(await catalog.arrayBuffer()));
