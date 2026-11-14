@@ -551,6 +551,27 @@
       "label": "DramaBos",
       "url": "https://www.dramabos.live/providers/",
       "status": "discovered"
+    },
+    {
+      "source": "dramafren",
+      "key": "shotshort",
+      "label": "ShotShort",
+      "url": "https://shotshort.dramafren.org/",
+      "status": "discovered"
+    },
+    {
+      "source": "dramafren",
+      "key": "idrama2",
+      "label": "iDrama2",
+      "url": "https://idrama.dramafren.org/index.php?id=100000641927&page=detail",
+      "status": "discovered"
+    },
+    {
+      "source": "dramafren",
+      "key": "radreel",
+      "label": "RadReel",
+      "url": "https://v2.dramafren.org/",
+      "status": "discovered"
     }
   ]
 }
