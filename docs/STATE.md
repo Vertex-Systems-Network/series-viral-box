@@ -33,3 +33,5 @@
 **Repeatable catalog pilot:** Added the public Anamana sitemap-to-snapshot command. A live three-title sample reconciled 90 episode entries against declared counts. This collector covers the sitemap's Anamana subset. Next source priorities are DramaFren v2 catalog pagination and provider-specific feed qualification.
 
 **DramaFren v2 pilot:** The public DramaBox catalog collector followed two live pages, found 45 distinct titles, and skipped three duplicate cards. Import and replay on local embedded PostgreSQL retained 45 titles and zero episode rows. Declared counts are recorded in the snapshot. Playback, individual episode inventory and full provider coverage remain unverified. Next: qualify a source that exposes stable episode identities or a complete inventory export.
+
+**Multi-provider pilot:** Added a selected-title ReelFren collector that shares checks with the Anamana sitemap collector. Live runs reconciled 44 SixthShort and 43 Sereal+ episode entries. Both snapshots imported and replayed in embedded PostgreSQL with 87 total episode rows. Provider-wide discovery and media eligibility remain open.
