@@ -136,3 +136,9 @@ Run `node scripts/collect-reelfren.mjs snapshot.json PROVIDER TITLE_URL [...]`. 
 ### Discover ReelFren title URLs
 
 Run `node scripts/discover-reelfren.mjs discovery.json`. The command reads public English Explore links and records each registered provider's browse URL and deduplicated title links. It records unmapped provider routes for review and retains titles with nonnumeric IDs as links requiring adapter validation. Use numeric-ID title URLs with the selected-title collector where the provider route is supported. Global Explore is a partial snapshot. Providers with no title links in that snapshot remain unknown.
+
+### Scan provider browse pages
+
+Run `node scripts/discover-reelfren.mjs discovery.json aniboy vigloo dramanova iqiyi` to extend a fresh Explore manifest with selected providers, or pass `--all` to attempt each registered provider's initial browse page sequentially. The manifest preserves global results and records the status and added titles per attempted provider. Failed requests are reported in the saved manifest and set a nonzero exit status. An empty public browse page leaves inventory unknown.
+
+Run `node scripts/collect-reelfren.mjs snapshot.json sixthshort --manifest discovery.json 1` to collect the first supported numeric-ID title for a provider. The limit is explicit and accepted from 1 to 100. The CLI also continues to accept explicit title URLs. Results cover the initial public pages and selected titles. Treat them as partial while pagination, other feeds, or regions are unverified.
