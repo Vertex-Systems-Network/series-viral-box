@@ -74,3 +74,17 @@ CREATE TABLE IF NOT EXISTS media_settings (
   id integer PRIMARY KEY CHECK (id = 1),
   cdn_base_url text
 );
+
+CREATE TABLE IF NOT EXISTS app_user (
+  id uuid PRIMARY KEY,
+  email text NOT NULL UNIQUE,
+  password_hash text NOT NULL,
+  disabled boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS app_session (
+  token_hash text PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  expires_at timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS app_session_expiry ON app_session(expires_at);
