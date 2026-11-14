@@ -6,8 +6,17 @@ Admin can send bearer-authenticated GET /admin/users and PATCH /admin/users?id=U
 
 ## Remaining user account work
 
-- Google and Sign in with Apple, with independent admin enable flags, provider client settings, secret storage, validated callbacks and explicit account linking.
+- Google and Sign in with Apple authorization, validated callbacks, explicit account linking and login buttons. Admin settings are described below.
 - Email verification, password reset/change, session management, profile and account deletion.
 - Watch history and progress, bookmarks, and access rules per episode.
 - Admin user search, audit events, viewer support actions and admin UI.
 - HTTPS deployment, production abuse controls, browser click-through and OAuth integration tests.
+
+## Google and Apple provider configuration
+
+Initialize the updated schema before using bearer-authenticated GET or PUT /admin/oauth-settings. PUT supplies the full settings for a single provider. To disable a provider while retaining IDs, send the IDs with enabled=false. Google accepts provider=google and clientId. Apple accepts provider=apple, clientId (Services ID), teamId and keyId. Both require a boolean enabled field.
+
+Set GOOGLE_CLIENT_SECRET or APPLE_PRIVATE_KEY out of band on the server. API responses expose only whether the corresponding environment value is configured. Saving or enabling a record prepares configuration. Provider authorization and callback handling must be implemented before the login buttons are exposed.
+
+- [Google server-side OAuth](https://developers.google.com/identity/protocols/oauth2/web-server)
+- [Sign in with Apple for the web](https://developer.apple.com/help/account/capabilities/configure-sign-in-with-apple-for-the-web/)
