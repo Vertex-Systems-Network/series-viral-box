@@ -5,6 +5,7 @@ import { serveFixtureWatch } from './fixture-watch-routes.mjs';
 import { catalogResponse } from './catalog-api.mjs';
 import { fixtureDemoResponse } from './fixture-demo.mjs';
 import { accountResponse, sessionUser } from './accounts.mjs';
+import { oauthSettingsResponse } from './oauth-settings.mjs';
 import pg from 'pg';
 import { handleMediaSettings } from './media-settings.mjs';
 
@@ -119,7 +120,8 @@ const server = createServer(async (incoming, outgoing) => {
         'Content-Type': 'application/json', 'Cache-Control': 'no-store',
       }).end(JSON.stringify(grant));
     }
-    if (incoming.url !== '/admin/media-settings') {
+    const oauthSettings = incoming.url === '/admin/oauth-settings';
+    if (!oauthSettings && incoming.url !== '/admin/media-settings') {
       outgoing.writeHead(404).end();
       return;
     }
@@ -134,12 +136,14 @@ const server = createServer(async (incoming, outgoing) => {
       chunks.push(chunk);
     }
     const body = Buffer.concat(chunks);
-    const request = new Request('http://localhost/admin/media-settings', {
+    const request = new Request('http://localhost' + incoming.url, {
       method: incoming.method,
       headers: incoming.headers,
       ...(body.length && !['GET', 'HEAD'].includes(incoming.method) ? { body } : {}),
     });
-    const response = await handleMediaSettings(request, db, MEDIA_ADMIN_TOKEN);
+    const response = oauthSettings
+      ? await oauthSettingsResponse(db, request, MEDIA_ADMIN_TOKEN)
+      : await handleMediaSettings(request, db, MEDIA_ADMIN_TOKEN);
     outgoing.writeHead(response.status, Object.fromEntries(response.headers));
     outgoing.end(Buffer.from(await response.arrayBuffer()));
   } catch {
