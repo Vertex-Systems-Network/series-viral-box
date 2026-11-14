@@ -13,3 +13,9 @@ Use model names as entry points and task roles as assignments. Every agent follo
 ## Handoff format
 
 Record task ID, status, branch/PR and commit, files and contracts changed, checks with evidence, blockers, recovery attempt, and the next action. Put durable decisions in dated ADRs linked from the plan. Keep current state short. Git and PR history carry detailed traces. Never depend on chat history or one tool's private memory.
+
+## Continuous execution
+
+A task completion is a checkpoint. Update the backlog and handoff, re-read dependencies, and immediately take the next independent ready task within the active objective. Continue through recoverable failures using bounded retries and verified alternatives. If one track is blocked, record the blocker and continue other ready work. Progress updates do not require a reply. Yield only when the objective is verified complete, the user directs a pause, or all remaining work requires a concrete external dependency or decision. At session limits, persist the exact next command, evidence and blocker state so the next agent can resume.
+
+Cross-session automation is a separate deliverable. It must load repository state on each run, acquire a single task lease, validate the active scope, checkpoint before exit, and schedule the next eligible task. Use draft PRs and normal review for production or destructive changes. Never claim cross-session execution is active without a verified runner.
