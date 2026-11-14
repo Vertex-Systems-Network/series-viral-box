@@ -22,6 +22,7 @@ This table is the source of truth for task status. GitHub issues can mirror task
 | P7-01 | Planned | P6-02 | Roll out additional production connectors one at a time. Require per-source evidence and verify cross-source deduplication. |
 | P7-02 | Planned | P0-02 | Inventory all known apps and comparable websites. Verify official publisher/site mappings, preserve cross-site provenance, and report duplicates and coverage gaps. |
 | P7-03 | Planned | P7-02, P2-02 | Add recurring discovery and qualification queue. Verify a new provider listing creates one pending record, review can enable metadata-only sync, and playable/downloadable counts are reported separately. |
+| P0-03 | Planned | P0-01 | Implement cross-session runner with task leases, durable handoff, bounded retries, and pause controls. Verify two ready tasks run consecutively across separate executions without manual continuation, and blocked work yields to an independent task. |
 
 ## Task card
 
