@@ -4,6 +4,16 @@
 <title>Series Viral Box</title><link rel="stylesheet" href="/catalog/style.css"></head>
 <body><main>
 <h1>Series Viral Box</h1>
+<button id="account" type="button">Log in</button><button id="logout" type="button" hidden>Log out</button>
+<dialog id="login"><form id="credentials">
+<h2>Log in or register</h2>
+<label>Email <input name="email" type="email" autocomplete="email" required></label>
+<label>Password <input name="password" type="password" minlength="12" maxlength="128" autocomplete="current-password" required></label>
+<p id="account-status" role="status"></p>
+<button name="action" value="login">Log in</button>
+<button name="action" value="register">Register</button>
+<button id="close-login" type="button">Cancel</button>
+</form></dialog>
 <form id="filters"><label>Provider <select name="source"><option value="">All providers</option></select></label>
 <label>Language <input name="locale" placeholder="All languages"></label><button>Apply</button></form>
 <p id="status" role="status"></p><ul id="titles"></ul>
