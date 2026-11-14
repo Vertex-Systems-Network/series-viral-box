@@ -6,7 +6,7 @@ Admin can send bearer-authenticated GET /admin/users and PATCH /admin/users?id=U
 
 ## Remaining user account work
 
-- Google and Sign in with Apple authorization, validated callbacks, explicit account linking and login buttons. Admin settings are described below.
+- Google and Apple live callback verification and explicit linking for existing accounts.
 - Email verification, password reset/change, session management, profile and account deletion.
 - Watch history and progress, bookmarks, and access rules per episode.
 - Admin user search, audit events, viewer support actions and admin UI.
@@ -16,7 +16,7 @@ Admin can send bearer-authenticated GET /admin/users and PATCH /admin/users?id=U
 
 Initialize the updated schema before using bearer-authenticated GET or PUT /admin/oauth-settings. PUT supplies the full settings for a single provider. To disable a provider while retaining IDs, send the IDs with enabled=false. Google accepts provider=google and clientId. Apple accepts provider=apple, clientId (Services ID), teamId and keyId. Both require a boolean enabled field.
 
-Set GOOGLE_CLIENT_SECRET or APPLE_PRIVATE_KEY out of band on the server. API responses expose only whether the corresponding environment value is configured. Saving or enabling a record prepares configuration. Provider authorization and callback handling must be implemented before the login buttons are exposed.
+Set GOOGLE_CLIENT_SECRET or APPLE_PRIVATE_KEY out of band on the server. API responses expose only whether the corresponding environment value is configured. Set AUTH_PUBLIC_ORIGIN to the HTTPS site origin with no trailing slash, route it to the loopback service through a trusted HTTPS proxy, and preserve the public Host header. Register /v1/oauth/google/callback and /v1/oauth/apple/callback with the respective provider. The catalog shows links only for enabled providers with required settings. New social identities require a verified email and attach by provider subject. Existing email collisions require an explicit link workflow, which remains pending.
 
 - [Google server-side OAuth](https://developers.google.com/identity/protocols/oauth2/web-server)
 - [Sign in with Apple for the web](https://developer.apple.com/help/account/capabilities/configure-sign-in-with-apple-for-the-web/)
