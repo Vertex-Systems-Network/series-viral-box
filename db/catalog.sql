@@ -69,3 +69,8 @@ CREATE TABLE IF NOT EXISTS fixture_media_asset (
 ALTER TABLE fixture_media_asset ADD COLUMN IF NOT EXISTS storage_bucket text;
 ALTER TABLE fixture_media_asset ADD COLUMN IF NOT EXISTS storage_prefix text;
 ALTER TABLE fixture_media_asset ADD COLUMN IF NOT EXISTS available_at timestamptz;
+
+CREATE TABLE IF NOT EXISTS media_settings (
+  id integer PRIMARY KEY CHECK (id = 1),
+  cdn_base_url text
+);
