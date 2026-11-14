@@ -1,6 +1,6 @@
 # Series Viral Box agent instructions
 
-Start with [project memory](docs/STATE.md), [backlog](docs/BACKLOG.md), and [architecture](docs/PLAN.md). Read [design workflow](docs/DESIGN.md) for UI tasks. These files and current Git/CI evidence are the shared project memory.
+Start with [project memory](docs/STATE.md), [backlog](docs/BACKLOG.md), [architecture](docs/PLAN.md), and [latest audit](docs/AUDIT.md). Read [design workflow](docs/DESIGN.md) for UI tasks. These files and current Git/CI evidence are the shared project memory.
 
 1. Fetch the latest base. Inspect open PRs and dependencies. Claim one ready task by opening a draft PR with its ID before substantial implementation. If a live claim exists, take another task. A stale claim is reassigned only after checking the latest PR activity.
 2. Work on an isolated branch. Write the task outcome, affected contracts, and acceptance checks into the PR. Continue independently through reversible implementation, verification, and recovery within scope.
