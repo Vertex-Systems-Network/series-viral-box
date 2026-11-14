@@ -83,3 +83,13 @@ Root HTTP results from the initial environment. A 200 confirms reachability of a
 - https://moboreels.dramafren.org/ — 403
 
 The [v2 site](https://v2.dramafren.org/) has separate editorial watch pages and a paginated DramaBox catalog. Qualify these paths independently. Treat numerical provider variants as separate source records pending identity verification.
+
+## Additional discovery candidates
+
+| Candidate | Observed | Next verification |
+| --- | --- | --- |
+| [Where to Watch Drama](https://wheretowatchdrama.com/en/platforms) | Multi-platform directory with title summaries and official or partner viewing links. | Check provider inventory, permitted metadata use, update method and title coverage. |
+| [DramaBos provider directory](https://www.dramabos.live/providers/) | Lists short-drama platforms and API availability. | Check operator, provenance, access terms, usable contracts and redistribution scope independently. |
+| Official provider sites and app stores | Primary route for confirming product, publisher, region, and official catalog or partnership contact. | Map an official URL and evidence date to each discovered provider. |
+
+Treat the registry as open-ended. Track discovery, identity verification, feed qualification, metadata sync, and media eligibility per source. Measure coverage against the known inventory and record unknown or unavailable coverage explicitly. Discover new provider listings on a recurring review and enqueue qualification before enabling an import.
