@@ -124,3 +124,7 @@ Run `DATABASE_URL=... node apps/worker/run.mjs --inventory snapshot.json` with a
 ### ReelFren Anamana public catalog collector
 
 Run `node scripts/collect-anamana.mjs snapshot.json` to collect up to 20 English titles from the public sitemap. Pass an optional title limit to sample a smaller set. The collector checks the public watch-page episode numbers against each detail page's declared count and fails the snapshot if any selected title cannot be reconciled. Import the resulting JSON with `node apps/worker/run.mjs --inventory snapshot.json` and a configured DATABASE_URL. Treat the snapshot as partial provider coverage. Episode identities use ReelFren's displayed episode numbers scoped to the title and locale.
+
+### DramaFren v2 DramaBox public title collector
+
+Run `node scripts/collect-dramafren-v2.mjs snapshot.json [PAGE_LIMIT]` (default two pages). It follows the public Next link and deduplicates titles by upstream ID and locale. Import with the existing snapshot command. The snapshot retains declared episode counts for audit. The DB importer currently persists title metadata only for this source because the catalog cards do not identify individual episodes. Keep expected episode inventory unknown pending an independently verified listing.
