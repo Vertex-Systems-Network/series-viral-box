@@ -172,3 +172,14 @@ byId('logout').addEventListener('click', async () => {
   }
 });
 fetch('/v1/account/session').then(response => response.json()).then(({ user }) => showAccount(user)).catch(() => {});
+
+const oauthResult = new URLSearchParams(location.search).get('oauth');
+if (oauthResult === 'failed') status.textContent = 'Social sign-in failed. Try again or log in with email.';
+fetch('/v1/oauth/providers').then(response => response.json()).then(({ providers }) => {
+  for (const provider of providers) {
+    const link = document.createElement('a');
+    link.href = '/v1/oauth/' + provider + '/start';
+    link.textContent = provider === 'google' ? 'Continue with Google' : 'Continue with Apple';
+    byId('social-login').append(link, document.createElement('br'));
+  }
+}).catch(() => {});
