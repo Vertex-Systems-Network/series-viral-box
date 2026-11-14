@@ -2,7 +2,12 @@ import { createHash, randomBytes, randomUUID, scrypt, timingSafeEqual } from 'no
 import { promisify } from 'node:util';
 
 const derive = promisify(scrypt);
-const hashToken = token => createHash('sha256').update(token).digest('hex');
+export const hashToken = token => createHash('sha256').update(token).digest('hex');
+export const validPassword = value => typeof value === 'string' && value.length >= 12 && value.length <= 128;
+export async function hashPassword(password) {
+  const salt = randomBytes(16).toString('hex');
+  return salt + ':' + (await derive(password, salt, 64)).toString('hex');
+}
 const lifetime = 86400;
 const reply = (data, status = 200, headers = {}) =>
   Response.json(data, { status, headers: { 'Cache-Control': 'no-store', ...headers } });
@@ -38,17 +43,16 @@ export async function accountResponse(db, request, secure = true) {
   const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
   const password = body?.password;
   if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-      typeof password !== 'string' || password.length < 12 || password.length > 128) {
+      !validPassword(password)) {
     return reply({ error: 'invalid_credentials' }, 400);
   }
 
   let user;
   if (action === 'register') {
-    const salt = randomBytes(16).toString('hex');
-    const digest = await derive(password, salt, 64);
+    const passwordHash = await hashPassword(password);
     const { rows } = await db.query(
       `INSERT INTO app_user (id, email, password_hash) VALUES ($1, $2, $3)
-       ON CONFLICT (email) DO NOTHING RETURNING id, email`, [randomUUID(), email, salt + ':' + digest.toString('hex')],
+       ON CONFLICT (email) DO NOTHING RETURNING id, email`, [randomUUID(), email, passwordHash],
     );
     if (!rows.length) return reply({ error: 'registration_unavailable' }, 409);
     user = rows[0];
