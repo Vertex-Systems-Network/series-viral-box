@@ -17,3 +17,5 @@ After schema initialization, set DATABASE_URL and MEDIA_ADMIN_TOKEN and run `nod
 ## Serve local fixture media
 
 Set MEDIA_SIGNING_KEY to a secret of at least 32 bytes and start the loopback media admin service. With an admin bearer token, POST to `/admin/fixture-grant?titleId=demo-series&locale=en&episodeId=demo-1&kind=playback`. Use kind=download for the MP4 attachment. Resolve the returned relative URL against the media service origin. HLS segments use the same signed path prefix as the playlist. The media route supports GET, HEAD and single byte ranges. The local signer applies only to assets published to the configured local disk directory.
+
+Run the full local media smoke test with `node --test scripts/media-delivery.test.mjs` after installing dependencies and FFmpeg. It packages generated video, publishes it to disk, registers the storage location in embedded PostgreSQL, resolves grants, and decodes HLS and MP4 over HTTP.
