@@ -22,7 +22,7 @@ const server = createServer(async (incoming, outgoing) => {
       outgoing.end(Buffer.from(await catalog.arrayBuffer()));
       return;
     }
-    if (local && await serveFixtureWatch(incoming, outgoing, url.pathname)) return;
+    if (await serveFixtureWatch(incoming, outgoing, url.pathname, Boolean(local))) return;
     if (local && url.pathname.startsWith('/fixture-media/')) {
       await local.serve(incoming, outgoing, url.pathname);
       return;
