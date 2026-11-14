@@ -20,3 +20,7 @@ Set GOOGLE_CLIENT_SECRET or APPLE_PRIVATE_KEY out of band on the server. API res
 
 - [Google server-side OAuth](https://developers.google.com/identity/protocols/oauth2/web-server)
 - [Sign in with Apple for the web](https://developer.apple.com/help/account/capabilities/configure-sign-in-with-apple-for-the-web/)
+
+## Viewer library API
+
+Signed-in viewers can list or save/delete bookmarks at /v1/me/bookmarks and list or update playback position at /v1/me/progress. Writes take source, titleId and locale query parameters. Progress also takes episodeId and position in whole seconds. GET returns up to 100 most recent records. All records are scoped to the active session's user. Browser writes require the site's configured Origin. The catalog and player UI integration remains pending.
