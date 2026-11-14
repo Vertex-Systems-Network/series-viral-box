@@ -9,3 +9,5 @@
 **Open:** Production feed and media scope, launch languages and territories, native file export versus offline playback, identity/account model, hosting budget, release ownership and design tool choice. Fixture development is ready independently of live feed access.
 
 **Latest handoff:** Planning baseline. No implementation checks have run. Every completed task updates this file and the [backlog](BACKLOG.md) with evidence and the next actionable step.
+
+**Coverage decision:** The provider registry covers apps found on ReelFren, DramaFren and comparable websites and expands as new sources are discovered. The live pilot remains the first validation step. See [source candidates](SOURCES.md) and backlog tasks P7-02/P7-03.
