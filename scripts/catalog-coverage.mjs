@@ -12,7 +12,7 @@ const missingSources = required.filter(id => !registered.has(id));
 
 const [expectedPath, importedPath] = process.argv.slice(2);
 if (Boolean(expectedPath) !== Boolean(importedPath)) {
-  throw new Error('Provide both expected inventory and imported inventory JSON files');
+  throw new Error('Provide both expected inventory JSON and imported inventory JSON or --db');
 }
 
 function index(rows, field, requiresCompleteness) {
@@ -39,7 +39,10 @@ function index(rows, field, requiresCompleteness) {
 }
 
 const expected = index(expectedPath ? await read(expectedPath) : [], 'episodes', true);
-const imported = index(importedPath ? await read(importedPath) : [], 'episodes', false);
+const importedRows = importedPath === '--db'
+  ? await (await import('../apps/worker/coverage-inventory.mjs')).readDatabaseInventory(process.env.DATABASE_URL)
+  : importedPath ? await read(importedPath) : [];
+const imported = index(importedRows, 'episodes', false);
 const sources = records.map(row => {
   const source = key(row);
   const inventory = expected.get(source);
