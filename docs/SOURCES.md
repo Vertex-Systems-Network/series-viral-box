@@ -97,3 +97,9 @@ Treat the registry as open-ended. Track discovery, identity verification, feed q
 ## Registry commands
 
 The machine-readable seed is [data/source-registry.json](../data/source-registry.json). Run `node scripts/source-registry.mjs check data/source-registry.json` to validate it. To queue reviewed discoveries, provide a JSON array of objects with `source`, `key`, `label` and `url`, then run `node scripts/source-registry.mjs merge data/source-registry.json candidates.json` from one working copy. Existing identities and their status are preserved. New entries enter as discovered. Inspect the diff before committing.
+
+## Inventory coverage
+
+The original registry is pinned in [required-sources.json](../data/required-sources.json). Public navigation review on 2026-11-14 also found ShotShort ([DramaPops navigation](https://dramapops.dramafren.org/)), iDrama2 ([indexed iDrama navigation](https://idrama.dramafren.org/index.php?id=100000641927&page=detail)), and RadReel ([DramaFren v2 notice](https://v2.dramafren.org/)). For iDrama2 and RadReel the registered URL is where the name was observed. Their own endpoints and episode inventories need verification.
+
+Run `node scripts/catalog-coverage.mjs` for the registry baseline check. For an inventory gate, run `node scripts/catalog-coverage.mjs expected.json imported.json`. Both files contain arrays of source records with `source` (registry source/key) and `episodes` (objects with titleId, locale and episodeId). Each expected record also supplies a boolean `complete`. Set it true only after an authoritative inventory traversal. The gate reports unknown and partial inventories and identifies missing episodes. Passing this gate establishes catalog coverage for the supplied snapshots. Media verification needs separate evidence that each expected episode has a playable object and, where available, a downloadable rendition.
