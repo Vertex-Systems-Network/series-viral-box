@@ -25,3 +25,7 @@ Run the full local media smoke test with `node --test scripts/media-delivery.tes
 The reusable web adapter is `attachBlobPlayback(video, Hls, grantUrl)` in apps/web/blob-playback.mjs. Pass a client-side hls.js constructor and the signed same-origin playback grant. Call the returned cleanup when leaving the page or switching episodes. The adapter requires MediaSource blob attachment and reports unsupported browsers or fatal HLS errors. Its current path contract is the local fixture route. Keep the upstream provider and object-storage URLs server-side. Browser networking can still show the app's temporary playlist and segment requests. The download grant remains a separate MP4 attachment.
 
 Run `node --test apps/web/blob-playback.test.mjs scripts/media-delivery.test.mjs`. This verifies adapter behavior with a test double and HTTP decoding with FFmpeg. The production watch-page integration, real browser MSE test, and CDN-backed same-origin route remain pending.
+
+## Fixture watch page
+
+Start the signed local media service and get a playback grant with the authenticated admin endpoint. Open `/fixture-watch#grant=ENCODED_GRANT` on the same service, encoding the relative grant with URLSearchParams or encodeURIComponent. hls.js is served locally. The fragment keeps the grant out of the watch page HTTP request. Run `node scripts/fixture-watch-smoke.mjs --http-only` to check the route and assets, or run without the flag for Chromium playback. For browser mode use `npx playwright install chromium` or set CHROMIUM_BIN to an installed Chromium.
