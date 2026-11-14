@@ -10,7 +10,7 @@ This table is the source of truth for task status. GitHub issues can mirror task
 | P1-02 | Planned | P1-01 | Implement catalog REST API and generated clients. Verify cursor pagination, provider filters and contract generation. |
 | P2-01 | Planned | P1-01 | Build adapter interface and fixture backfill/incremental sync. Verify transaction, checkpoint recovery and deletion handling. |
 | P2-02 | Planned | P2-01 | Add source health, admin resync, contract drift detection, rate-limit retries and incomplete-run protection. |
-| P3-01 | Planned | P2-01 | Add ingest worker and storage pipeline with fixture media. Verify HLS + MP4 output, atomic publish and idempotent retries. |
+| P3-01 | Planned | P2-01 | Build on the verified local fixture packaging command to add ingest worker and storage pipeline. Verify HLS + MP4 output, atomic publish and idempotent retries. |
 | P3-02 | Planned | P3-01, P1-02 | Implement playback and download grants. Verify permissions, expiration, removed titles and a failed replacement. |
 | P4-01 | Ready | Planning PR merged | Design AI finishes responsive web, mobile and admin spec and records visual QA acceptance. |
 | P4-02 | Planned | P4-01, P1-02 | Implement web catalog, detail and search against shared API. Verify responsive layouts and keyboard navigation. |
@@ -22,7 +22,7 @@ This table is the source of truth for task status. GitHub issues can mirror task
 | P7-01 | Planned | P6-02 | Roll out additional production connectors one at a time. Require per-source evidence and verify cross-source deduplication. |
 | P7-02 | Planned | P0-02 | Inventory all known apps and comparable websites. Verify official publisher/site mappings, preserve cross-site provenance, and report duplicates and coverage gaps. |
 | P7-03 | Planned | P7-02, P2-02 | Add recurring discovery and qualification queue. Verify a new provider listing creates one pending record, review can enable metadata-only sync, and playable/downloadable counts are reported separately. |
-| P0-03 | Planned | P0-01 | Implement cross-session runner with task leases, durable handoff, bounded retries, and pause controls. Verify two ready tasks run consecutively across separate executions without manual continuation, and blocked work yields to an independent task. |
+| P0-03 | In review | Local Node.js workspace | Manually launched continuation supervisor. Separate task processes share leases and durable state. Pause, resumption and blocked dependency isolation tested. AI scheduling is excluded in this chat. |
 
 ## Task card
 
