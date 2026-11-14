@@ -65,3 +65,5 @@
 **Catalog API handoff:** The loopback media service now exposes provider, title list and title/episode detail reads. Embedded PostgreSQL tests passed filtering, cursor pagination, detail, and invalid request cases. Five worker tests passed locally. Next: integrate catalog UI and provide application-level authorization for playback grants. No AI scheduling was added.
 
 **Catalog UI handoff:** Added a local browse page connected to the read-only catalog API with provider and language filters, cursor pagination and title/episode details. Route smoke and worker tests passed. Browser click-through and application-level playback authorization remain open. Next: verify the browser catalog flow and wire an authorized watch action.
+
+**Catalog media actions:** Fixture episodes now offer Watch and Download through a local opt-in grant endpoint. The media integration test passed disabled demo, unsupported method, signed HLS and MP4 decoding, ranges and scope isolation. Browser catalog click-through and production user entitlements remain pending.
