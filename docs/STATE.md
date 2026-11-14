@@ -43,3 +43,5 @@
 **Continuation rule:** Active agents advance through ready work without a user prompt after each checkpoint. The cross-session runner remains an implementation task. Its first acceptance scenario is two consecutive ready tasks resumed across separate executions with no manual continuation.
 
 **Runner handoff:** The SQLite continuation runner supports once, drain, supervise, status, pause and resume. Local process tests passed durable resumption, pause, blocked-dependency isolation and automatic dispatch to separate child processes. No hosted scheduler or live AI executor is active. Next: define the reviewed task manifest and connect the scoped AI executor and scheduler.
+
+**Latest handoff:** User excluded AI scheduling in this chat. The manually launched continuation supervisor's local test passed again. Added local fixture-media packaging into a verified MP4 and HLS VOD playlist. Generated test media decoded from both outputs, and replay published the same directory. P3-01 remains open for queue, object storage, DB asset registration, and rights-aware publication. Next executable step is DB registration for fixture assets.
