@@ -2,14 +2,18 @@
 
 Use http://127.0.0.1:3101/catalog (or the configured loopback port). Re-run fixture sync to initialize the new tables. Local cookie transport uses HTTP on loopback. The account handler supports Secure cookies for a future HTTPS integration. Login/register requests are limited per client IP in the local service. Fixture grants require ENABLE_FIXTURE_DEMO=1, a session, and a published local fixture asset.
 
-Admin can send bearer-authenticated GET /admin/users and PATCH /admin/users?id=UUID&disabled=true or false. GET returns up to 100 accounts with nextCursor for the after parameter. Status changes revoke existing sessions.
+Admin can send bearer-authenticated GET /admin/users and PATCH /admin/users?id=UUID&disabled=true or false. GET returns up to 100 accounts with nextCursor for the after parameter. Status changes revoke existing sessions. Apply migration 005 for support history. Open /admin/accounts on the loopback service and enter the existing bearer token. The panel lists viewers, looks up an exact email, suspends or restores access, and displays the last 50 support events. Events record the configured MEDIA_ADMIN_ACTOR label, or media-admin by default. A shared token identifies the service operator role. Per-operator authentication remains a production dependency.
+
+## Signed-in settings
+
+Open **Account settings** in the catalog to view the account email, change an existing password, or sign out other sessions. Password changes require the current password, cancel outstanding reset links and revoke sibling sessions. The current session remains active. Social-only accounts can use session controls.
 
 ## Remaining user account work
 
 - Google and Apple live callback verification.
-- Signed-in password change, session management, profile and account deletion.
+- Additional profile editing and account deletion.
 - Watch history and progress, bookmarks, and access rules per episode.
-- Admin user search, audit events, viewer support actions and admin UI.
+- Per-operator production admin identities and broader support actions.
 - HTTPS deployment, production abuse controls, browser click-through and OAuth integration tests.
 
 ## Google and Apple provider configuration

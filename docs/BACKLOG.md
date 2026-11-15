@@ -37,7 +37,7 @@ Use this queue for current task selection. The phase table above defines deliver
 | AUD-05 | Ready | Registry and coverage tool | Separate discovery roots and actual provider inventories, track per-locale expected IDs and evidence, and compare catalog and media availability separately. Live completeness needs upstream exports. |
 | AUD-06 | Ready | Local storage and CDN settings | Add CDN delivery integration and test against a private fixture origin. Live verification needs configured CDN and bucket. |
 | AUD-07 | Ready | Target architecture | Finalize design spec and move fixture UI/API toward Next.js and NestJS with contract parity. Start Expo after shared contracts are stable. |
-| AUD-08 | In progress | Account recovery APIs, migration runner | Add durable mail delivery, signed-in profile/password/session controls, admin UI and audit events. Live delivery needs configured sender. |
+| AUD-08 | In review | Account recovery APIs, migration runner | Add durable mail delivery, signed-in profile/password/session controls, admin UI and audit events. Live delivery needs configured sender. |
 
 ## Task card
 
