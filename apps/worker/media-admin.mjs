@@ -1,111 +1,35 @@
+import { createViewerRoutes } from './viewer-routes.mjs';
 import { createServer } from 'node:http';
-import { createLocalMedia } from './local-media.mjs';
-import { createFixtureCdnProxy } from './fixture-cdn.mjs';
 import { resolveFixtureGrant } from './fixture-grants.mjs';
 import { serveFixtureWatch } from './fixture-watch-routes.mjs';
 import { catalogResponse } from './catalog-api.mjs';
-import { fixtureDemoResponse } from './fixture-demo.mjs';
 import { adminAccountsResponse } from './admin-accounts.mjs';
-import { accountResponse, sessionUser } from './accounts.mjs';
 import { oauthSettingsResponse } from './oauth-settings.mjs';
-import { oauthResponse } from './oauth-flow.mjs';
-import { viewerLibraryResponse } from './viewer-library.mjs';
-import { recoveryResponse } from './recovery.mjs';
-import { createMailOutbox } from './account-mail-outbox.mjs';
-import { resetMailer } from './reset-mail.mjs';
-import { verificationResponse } from './email-verification.mjs';
 import pg from 'pg';
 import { handleMediaSettings } from './media-settings.mjs';
 
 const { DATABASE_URL, MEDIA_ADMIN_TOKEN, MEDIA_ADMIN_PORT = '3101' } = process.env;
 if (!DATABASE_URL || !MEDIA_ADMIN_TOKEN) throw new Error('Set DATABASE_URL and MEDIA_ADMIN_TOKEN');
-const local = process.env.MEDIA_SIGNING_KEY
-  ? createLocalMedia(process.env.FIXTURE_MEDIA_DIR ?? './var/media', process.env.MEDIA_SIGNING_KEY)
-  : null;
-const cdnBase = process.env.FIXTURE_CDN_BASE_URL;
-if (cdnBase && !local) throw new Error('Set MEDIA_SIGNING_KEY to use FIXTURE_CDN_BASE_URL');
-const cdnProxy = cdnBase ? createFixtureCdnProxy(cdnBase) : null;
 const db = new pg.Pool({ connectionString: DATABASE_URL });
-
-const deliverReset = resetMailer(process.env);
-const accountMailOutbox = process.env.MAIL_OUTBOX_KEY
-  ? createMailOutbox(process.env.MAIL_OUTBOX_KEY) : null;
-const attempts = new Map();
+const { handleViewer, local } = createViewerRoutes(db, {
+  localOrigin: () => 'http://127.0.0.1:' + server.address().port,
+});
 const port = Number(MEDIA_ADMIN_PORT);
 const server = createServer(async (incoming, outgoing) => {
   try {
     const url = new URL(incoming.url, 'http://localhost');
-    if (process.env.AUTH_PUBLIC_ORIGIN && url.pathname.startsWith('/v1/oauth/') &&
-        incoming.headers.host !== new URL(process.env.AUTH_PUBLIC_ORIGIN).host) {
-      return outgoing.writeHead(403).end();
-    }
-    const oauth = await oauthResponse(db, url, incoming.method, incoming);
-    if (oauth) {
-      const headers = Object.fromEntries(oauth.headers);
-      if (oauth.headers.has('set-cookie')) headers['set-cookie'] = oauth.headers.getSetCookie();
-      return outgoing.writeHead(oauth.status, headers).end(await oauth.text());
-    }
     if (['/admin/users', '/admin/user-audit'].includes(url.pathname)) {
       const request = new Request(url, { method: incoming.method, headers: incoming.headers });
       const response = await adminAccountsResponse(db, request, MEDIA_ADMIN_TOKEN, process.env.MEDIA_ADMIN_ACTOR);
       return outgoing.writeHead(response.status, Object.fromEntries(response.headers)).end(await response.text());
     }
-    if (['/v1/account/session', '/v1/account/login', '/v1/account/register', '/v1/account/logout', '/v1/account/forgot-password', '/v1/account/reset-password', '/v1/account/request-verification', '/v1/account/verify-email', '/v1/account/change-password', '/v1/account/revoke-other-sessions'].includes(url.pathname)) {
-      const site = new URL(process.env.AUTH_PUBLIC_ORIGIN ?? 'http://127.0.0.1:' + server.address().port);
-      if (incoming.headers.host !== site.host) return outgoing.writeHead(403).end();
-      if (incoming.method === 'POST' && /\/(login|register|forgot-password|reset-password|request-verification|verify-email|change-password)$/.test(url.pathname)) {
-        const minute = Math.floor(Date.now() / 60000);
-        const address = incoming.socket.remoteAddress;
-        for (const [key, value] of attempts) if (value.minute !== minute) attempts.delete(key);
-        const attempt = attempts.get(address) ?? { minute, count: 0 };
-        attempts.set(address, attempt);
-        if (++attempt.count > 10) return outgoing.writeHead(429).end();
-      }
-      const chunks = [];
-      let length = 0;
-      for await (const chunk of incoming.iterator({ destroyOnReturn: false })) {
-        length += chunk.length;
-        if (length > 4096) return outgoing.writeHead(413, { Connection: 'close' }).end();
-        chunks.push(chunk);
-      }
-      const request = new Request(new URL(url.pathname, site), {
-        method: incoming.method,
-        headers: incoming.headers,
-        ...(length && incoming.method === 'POST' ? { body: Buffer.concat(chunks) } : {}),
-      });
-      const account = /\/(request-verification|verify-email)$/.test(url.pathname)
-        ? await verificationResponse(db, request, deliverReset, accountMailOutbox)
-        : /\/(forgot-password|reset-password)$/.test(url.pathname)
-        ? await recoveryResponse(db, request, deliverReset, accountMailOutbox)
-        : await accountResponse(db, request, site.protocol === 'https:');
-      outgoing.writeHead(account.status, Object.fromEntries(account.headers));
-      return outgoing.end(Buffer.from(await account.arrayBuffer()));
-    }
-    if (url.pathname === '/v1/fixture-playback' && local && process.env.ENABLE_FIXTURE_DEMO === '1') {
-      const site = process.env.AUTH_PUBLIC_ORIGIN ?? 'http://127.0.0.1:' + server.address().port;
-      if (incoming.headers.origin !== site) return outgoing.writeHead(403).end();
-      if (!await sessionUser(db, incoming.headers.cookie)) {
-        return outgoing.writeHead(401, { 'Cache-Control': 'no-store' }).end();
-      }
-    }
-    const viewerOrigin = process.env.AUTH_PUBLIC_ORIGIN ?? 'http://127.0.0.1:' + server.address().port;
-    const library = await viewerLibraryResponse(db, incoming, viewerOrigin);
-    if (library) {
-      outgoing.writeHead(library.status, Object.fromEntries(library.headers));
-      return outgoing.end(await library.text());
-    }
-    const catalog = await catalogResponse(db, url, incoming.method) ??
-      await fixtureDemoResponse(db, local, process.env.ENABLE_FIXTURE_DEMO === '1', url, incoming.method);
+    if (await handleViewer(incoming, outgoing, url)) return;
+    const catalog = await catalogResponse(db, url, incoming.method);
     if (catalog) {
       outgoing.writeHead(catalog.status, Object.fromEntries(catalog.headers));
-      outgoing.end(Buffer.from(await catalog.arrayBuffer()));
-      return;
+      return outgoing.end(Buffer.from(await catalog.arrayBuffer()));
     }
     if (await serveFixtureWatch(incoming, outgoing, url.pathname, Boolean(local))) return;
-    if (local && url.pathname.startsWith('/fixture-media/')) {
-      await (cdnProxy ?? local.serve)(incoming, outgoing, url.pathname);
-      return;
-    }
     if (local && url.pathname === '/admin/fixture-grant') {
       const authProbe = new Request('http://localhost/admin/media-settings', {
         method: 'OPTIONS', headers: incoming.headers,

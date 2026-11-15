@@ -1,68 +1,27 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { chromium } from 'playwright';
 import { PGlite } from '@electric-sql/pglite';
-import { accountResponse, sessionUser } from '../apps/worker/accounts.mjs';
-import { recoveryResponse } from '../apps/worker/recovery.mjs';
-import { verificationResponse } from '../apps/worker/email-verification.mjs';
-import { catalogResponse } from '../apps/worker/catalog-api.mjs';
-import { fixtureDemoResponse } from '../apps/worker/fixture-demo.mjs';
-import { viewerLibraryResponse } from '../apps/worker/viewer-library.mjs';
+import { createCatalogApp } from '../apps/api/catalog-app.mjs';
+import { migrateCatalog } from '../apps/worker/migrate-catalog.mjs';
 import { syncCatalog } from '../apps/worker/sync.mjs';
 import { localFixtureStorage, publishFixtureMedia } from '../apps/worker/publish-fixture-media.mjs';
-import { serveFixtureWatch } from '../apps/worker/fixture-watch-routes.mjs';
 import { createLocalMedia } from '../apps/worker/local-media.mjs';
 
 const run = promisify(execFile);
 const root = await mkdtemp(join(tmpdir(), 'svb-watch-'));
-const media = createLocalMedia(root, 'fixture-key-'.repeat(4));
+const key = 'fixture-key-'.repeat(4);
+const media = createLocalMedia(root, key);
 const db = new PGlite();
 const inbox = new Map();
 const deliverMail = (email, link, purpose = 'reset') => {
   inbox.set(purpose, { email, link });
 };
-const server = createServer(async (request, response) => {
-  try {
-    const origin = 'http://127.0.0.1:' + server.address().port;
-    const url = new URL(request.url, origin);
-    const { pathname } = url;
-    let result;
-    if (pathname.startsWith('/v1/account/')) {
-      const chunks = [];
-      for await (const chunk of request) chunks.push(chunk);
-      const accountRequest = new Request(url, {
-        method: request.method, headers: request.headers,
-        ...(chunks.length ? { body: Buffer.concat(chunks) } : {}),
-      });
-      if (pathname.endsWith('-password')) {
-        result = await recoveryResponse(db, accountRequest, deliverMail);
-      } else if (pathname.endsWith('/request-verification') || pathname.endsWith('/verify-email')) {
-        result = await verificationResponse(db, accountRequest, deliverMail);
-      } else {
-        result = await accountResponse(db, accountRequest, false);
-      }
-    } else if (pathname === '/v1/fixture-playback') {
-      result = await sessionUser(db, request.headers.cookie)
-        ? await fixtureDemoResponse(db, media, true, url, request.method)
-        : new Response(null, { status: 401 });
-    } else {
-      result = await catalogResponse(db, url, request.method) ??
-        await viewerLibraryResponse(db, request, origin);
-    }
-    if (result) {
-      response.writeHead(result.status, Object.fromEntries(result.headers)).end(await result.text());
-      return;
-    }
-    if (!await serveFixtureWatch(request, response, pathname)) await media.serve(request, response, pathname);
-  } catch {
-    response.destroy();
-  }
-});
+let app;
 let browser;
 try {
   const input = join(root, 'input.mp4');
@@ -70,14 +29,18 @@ try {
     '-t', '3', '-c:v', 'libx264', input]);
   const { stdout } = await run(process.execPath, ['scripts/package-media.mjs', input, root]);
   const { directory } = JSON.parse(stdout);
-  await db.exec(await readFile(new URL('../db/catalog.sql', import.meta.url), 'utf8'));
+  await migrateCatalog(db);
   await syncCatalog(db, JSON.parse(await readFile(new URL('../apps/worker/fixture.json', import.meta.url))));
   const storage = localFixtureStorage(root);
   const prefix = await publishFixtureMedia(db, storage, directory, 'demo-series', 'en', 'demo-1') + '/';
   const grant = await media.sign({ bucket: storage.bucket, key: prefix + 'index.m3u8',
     scope: 'prefix', expiresAt: new Date(Date.now() + 60000) });
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const origin = 'http://127.0.0.1:' + server.address().port;
+  app = await createCatalogApp(db, {
+    env: { ENABLE_FIXTURE_DEMO: '1', MEDIA_SIGNING_KEY: key, FIXTURE_MEDIA_DIR: root },
+    deliver: deliverMail,
+  });
+  await app.listen(0, '127.0.0.1');
+  const origin = await app.getUrl();
   for (const path of ['/fixture-watch', '/fixture-watch/hls.js', '/fixture-watch/player.mjs',
     '/fixture-watch/blob-playback.mjs', grant]) {
     const response = await fetch(origin + path);
@@ -178,7 +141,7 @@ try {
   }
 } finally {
   await browser?.close();
-  await new Promise(resolve => server.close(resolve));
+  await app?.close();
   await db.close();
   await rm(root, { recursive: true, force: true });
 }
