@@ -12,4 +12,6 @@
 
 **First task:** AUD-01. Add repeatable account browser coverage for password reset and verification using injected mail, without waiting for live credentials. Start from scripts/fixture-watch-smoke.mjs and the recovery/verification worker tests. Then take another ready item in backlog order. No production release while P0 findings remain open.
 
+**AUD-02:** [Draft PR #3](https://github.com/Vertex-Systems-Network/series-viral-box/pull/3) defines and tests issuance and request-time checks for playback and downloads. All 13 worker tests passed locally. The three policy tests cover separate rights, territory, time bounds, session revocation, and withdrawal or replacement. See [MEDIA.md](MEDIA.md) for the production API and private delivery contract. The next ready task after this checkpoint is AUD-03, versioned migrations with clean and upgrade coverage.
+
 **External dependencies:** Complete licensed provider inventories, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Work on fixtures, contract tests and design can proceed independently.

@@ -29,3 +29,16 @@ Run `node --test apps/web/blob-playback.test.mjs scripts/media-delivery.test.mjs
 ## Fixture watch page
 
 Start the signed local media service and get a playback grant with the authenticated admin endpoint. Open `/fixture-watch#grant=ENCODED_GRANT` on the same service, encoding the relative grant with URLSearchParams or encodeURIComponent. hls.js is served locally. The fragment keeps the grant out of the watch page HTTP request. Run `node scripts/fixture-watch-smoke.mjs --http-only` to check the route and assets, or run without the flag for Chromium playback. For browser mode use `npx playwright install chromium` or set CHROMIUM_BIN to an installed Chromium.
+
+## Production grant policy
+
+The policy in `apps/worker/media-entitlement.mjs` evaluates trusted server facts for both grant issuance and media requests. The production API and private delivery path must supply those facts and enforce the result.
+
+- Resolve the active session from the account store. Require an enabled viewer who owns that session. Invalidate the viewer's sessions when suspending the account so restoring access requires a fresh session.
+- Obtain the territory from trusted ingress using its canonical country code. Strip client-supplied territory headers at the trust boundary. Deny requests with unknown territory, including when the permission explicitly covers all territories with `*`.
+- Evaluate rights and asset availability for the canonical episode identity and requested action. Playback requires a published HLS rendition and download requires a published MP4 plus a separate download permission. Rights start times are inclusive and end times are exclusive. Use UTC epoch milliseconds from the server clock.
+- Expire grants at the earliest of five minutes, session expiry, or the applicable rights end. Bind each grant to the action, episode, territory, viewer, session, asset version, and rights revision. Use a new rights revision for every rights update and an immutable version for every published asset replacement.
+- Resolve claims from an opaque server-held grant or authenticated token. Re-evaluate current facts before every playlist, segment, MP4, HEAD, and range response, including cache hits. Scope playback to the asset's HLS objects and download to the exact MP4. Keep the object origin private and require authorization at the delivery path before releasing bytes.
+- Reject the next request after logout, password reset, suspension, a rights change, or asset withdrawal. Requests authorized before the change may finish and clients can retain bytes already received. Short-lived bearer CDN URLs alone cannot enforce this revocation contract.
+
+The worker tests use synthetic facts and cover both actions, territory, window boundaries, expiry and revocation. The loopback fixture signer continues to use its local fixture contract. Production request enforcement and private origin validation belong to the API and CDN integration.

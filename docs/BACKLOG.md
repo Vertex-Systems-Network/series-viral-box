@@ -31,7 +31,7 @@ Use this queue for current task selection. The phase table above defines deliver
 | ID | Status | Dependency | Acceptance evidence |
 | --- | --- | --- | --- |
 | AUD-01 | Ready | Local account APIs | Extend Chromium coverage to request and consume reset and verification links via a test mail transport. Verify revoked session and visible verified status. |
-| AUD-02 | In progress | Local media pipeline | Specify and test production playback/download entitlement, disabled viewer behavior, territory/window checks, and existing grant expiry/revocation. |
+| AUD-02 | In review | Local media pipeline | Specify and test production playback/download entitlement, disabled viewer behavior, territory/window checks, and existing grant expiry/revocation. |
 | AUD-03 | Ready | Fixture schema | Introduce versioned migrations and test clean DB plus upgrade of existing catalog/account/asset records. |
 | AUD-04 | Ready | OAuth callback code | Test successful and rejected token exchange with fixtures, then implement explicit authenticated linking. Live provider test needs HTTPS and real credentials. |
 | AUD-05 | Ready | Registry and coverage tool | Separate discovery roots and actual provider inventories, track per-locale expected IDs and evidence, and compare catalog and media availability separately. Live completeness needs upstream exports. |
