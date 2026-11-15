@@ -4,6 +4,8 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
+import { createServer } from 'node:http';
+import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { PGlite } from '@electric-sql/pglite';
 import { createCatalogApp } from '../apps/api/catalog-app.mjs';
@@ -22,6 +24,8 @@ const deliverMail = (email, link, purpose = 'reset') => {
   inbox.set(purpose, { email, link });
 };
 let app;
+let web;
+let server;
 let browser;
 try {
   const input = join(root, 'input.mp4');
@@ -35,12 +39,21 @@ try {
   const prefix = await publishFixtureMedia(db, storage, directory, 'demo-series', 'en', 'demo-1') + '/';
   const grant = await media.sign({ bucket: storage.bucket, key: prefix + 'index.m3u8',
     scope: 'prefix', expiresAt: new Date(Date.now() + 60000) });
-  app = await createCatalogApp(db, {
-    env: { ENABLE_FIXTURE_DEMO: '1', MEDIA_SIGNING_KEY: key, FIXTURE_MEDIA_DIR: root },
-    deliver: deliverMail,
-  });
+  const env = { ENABLE_FIXTURE_DEMO: '1', MEDIA_SIGNING_KEY: key, FIXTURE_MEDIA_DIR: root };
+  app = await createCatalogApp(db, { env, deliver: deliverMail });
   await app.listen(0, '127.0.0.1');
-  const origin = await app.getUrl();
+  let origin = await app.getUrl();
+  if (process.argv.includes('--next')) {
+    process.env.CATALOG_API_URL = origin;
+    const { default: next } = await import('next');
+    web = next({ dir: fileURLToPath(new URL('../apps/web', import.meta.url)), dev: false, quiet: true });
+    await web.prepare();
+    server = createServer(web.getRequestHandler());
+    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+    origin = 'http://127.0.0.1:' + server.address().port;
+    process.env.VIEWER_PUBLIC_ORIGIN = origin;
+    env.AUTH_PUBLIC_ORIGIN = origin;
+  }
   for (const path of ['/fixture-watch', '/fixture-watch/hls.js', '/fixture-watch/player.mjs',
     '/fixture-watch/blob-playback.mjs', grant]) {
     const response = await fetch(origin + path);
@@ -141,6 +154,8 @@ try {
   }
 } finally {
   await browser?.close();
+  if (server) await new Promise(resolve => server.close(resolve));
+  await web?.close();
   await app?.close();
   await db.close();
   await rm(root, { recursive: true, force: true });

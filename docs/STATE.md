@@ -17,8 +17,8 @@
 
 **AUD-07 viewer transport:** [PR #12](https://github.com/Vertex-Systems-Network/series-viral-box/pull/12) moves the existing fixture account, OAuth, library and media routes into the NestJS entry point through a shared handler. Admin routes are still on the separate loopback service. Run `npm test` and `node scripts/fixture-watch-smoke.mjs --http-only` for worker and transport checks. The Media playback workflow tests the same NestJS transport in Chromium.
 
-**Next executable task:** Add the same-origin routing needed for Next.js viewer mutations and media playback, and verify host, cookie, range and origin behavior end to end. Design work is tracked separately from the implementation loop.
+**AUD-07 same-origin fixture:** [PR #13](https://github.com/Vertex-Systems-Network/series-viral-box/pull/13) connects the existing viewer catalog and media routes through the Next.js origin. The built-app parity test verifies a session cookie round trip, cross-origin mutation rejection, a signed download range, HEAD semantics, and admin isolation.
+
+**Next executable task:** Start native client contracts for signed playback, progress and download after the Chromium viewer lifecycle passes on [PR #13](https://github.com/Vertex-Systems-Network/series-viral-box/pull/13). Design remains separate. Production provider credentials and device acceptance still need external verification.
 
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
-
-**Active claim:** AUD-07 same-origin Next.js viewer routing on `codex/aud-07-same-origin`.

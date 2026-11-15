@@ -16,4 +16,9 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: npx playwright install --with-deps chromium
       - run: node --test apps/web/blob-playback.test.mjs scripts/media-delivery.test.mjs
-      - run: node scripts/fixture-watch-smoke.mjs
+      - run: npm run -w @series-viral-box/web build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+      - run: node scripts/fixture-watch-smoke.mjs --next
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
