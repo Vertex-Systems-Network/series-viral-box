@@ -15,6 +15,8 @@
 
 **Integrated verification:** 23 worker tests, four media/continuation tests, HTTP fixture smoke, registry baseline, Next.js production build, and NestJS/Next.js HTTP parity passed together. Run `npm ci` then `npm test` and the parity commands below to reproduce the checkpoint.
 
-**Next executable task:** Continue AUD-07 from [PR #11](https://github.com/Vertex-Systems-Network/series-viral-box/pull/11). Figma v0.1 contains seven editable frames. Run `npm ci`, `npm run -w @series-viral-box/web build` and `node --test scripts/platform-parity.test.mjs` to reproduce the read-only baseline. Use [DESIGN.md](DESIGN.md) to verify mobile, native and admin interactions and additional states before the remaining UI migration. Promote shared route contracts before starting Expo. Recheck any live claim before adding a branch.
+**AUD-07 viewer transport:** [PR #12](https://github.com/Vertex-Systems-Network/series-viral-box/pull/12) moves the existing fixture account, OAuth, library and media routes into the NestJS entry point through a shared handler. Admin routes are still on the separate loopback service. Run `npm test` and `node scripts/fixture-watch-smoke.mjs --http-only` for worker and transport checks. The Media playback workflow tests the same NestJS transport in Chromium.
+
+**Next executable task:** Add the same-origin routing needed for Next.js viewer mutations and media playback, and verify host, cookie, range and origin behavior end to end. Design work is tracked separately from the implementation loop.
 
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
