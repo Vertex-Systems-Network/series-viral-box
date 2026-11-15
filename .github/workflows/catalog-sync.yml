@@ -24,6 +24,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - run: npm run -w @series-viral-box/web build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+      - run: node --test scripts/platform-parity.test.mjs
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
       - run: |
           npm run sync:fixture
           npm run sync:fixture

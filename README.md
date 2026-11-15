@@ -40,3 +40,10 @@ Start `node apps/worker/media-admin.mjs` with DATABASE_URL and MEDIA_ADMIN_TOKEN
 Open `/catalog` on the loopback service to browse providers, filter by locale, page through titles, and view episode lists.
 
 For the loopback fixture demo, set `ENABLE_FIXTURE_DEMO=1` alongside `MEDIA_SIGNING_KEY` and publish the fixture media first. `/catalog` then provides Watch and Download actions for published fixture episodes. Leave the flag unset outside a local demo.
+
+
+## Run the Next.js and NestJS catalog slice
+
+After fixture sync, start the read-only NestJS API with `DATABASE_URL=... npm run -w @series-viral-box/api start`. It defaults to loopback port 3103. In another terminal run `npm run -w @series-viral-box/web dev` and open http://127.0.0.1:3000. Use `CATALOG_API_PORT` and the Next server's `CATALOG_API_URL` to select another local upstream. The web slice lists and filters titles, pages through results, and shows episode metadata.
+
+Run `npm run -w @series-viral-box/web build` and `node --test scripts/platform-parity.test.mjs` to exercise the built web app, NestJS transport and seeded catalog. The loopback service remains the entry point for playback, viewer accounts, and admin until these contracts are migrated.

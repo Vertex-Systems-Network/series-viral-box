@@ -12,4 +12,6 @@
 
 **First task:** AUD-01. Add repeatable account browser coverage for password reset and verification using injected mail, without waiting for live credentials. Start from scripts/fixture-watch-smoke.mjs and the recovery/verification worker tests. Then take another ready item in backlog order. No production release while P0 findings remain open.
 
+**AUD-07:** [Draft PR #8](https://github.com/Vertex-Systems-Network/series-viral-box/pull/8) adds a NestJS read-only catalog adapter and Next.js catalog and title screens. Run the web build followed by `node --test scripts/platform-parity.test.mjs` to verify the seeded HTTP slice. Keep AUD-07 open for the versioned design source, visual acceptance, and remaining API/UI migration before Expo. AUD-08 can proceed independently on the existing account contract.
+
 **External dependencies:** Complete licensed provider inventories, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Work on fixtures, contract tests and design can proceed independently.
