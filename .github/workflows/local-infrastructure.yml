@@ -17,8 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-      - run: npm ci
+      - run: npm install --global pnpm@11.25.0
+      - run: pnpm install --frozen-lockfile
       - name: Start local services
         run: |
           cp .env.example .env
@@ -30,8 +30,8 @@ jobs:
           set -a
           source .env
           set +a
-          npm run sync:fixture
-          npm run sync:fixture
+          pnpm run sync:fixture
+          pnpm run sync:fixture
           test "$(docker compose exec -T postgres psql -U fixture -d catalog -Atc 'SELECT count(*) FROM catalog_episode')" = 1
           test "$(docker compose exec -T redis redis-cli SET fixture:probe ok)" = OK
           test "$(docker compose exec -T redis redis-cli GET fixture:probe)" = ok

@@ -13,9 +13,9 @@
 | AUD-07 | [PR #8](https://github.com/Vertex-Systems-Network/series-viral-box/pull/8) in progress | Next.js and NestJS read-only catalog parity. Remaining work includes the versioned design source, visual acceptance, the account/watch/download/admin contracts, and Expo. |
 | AUD-08 | [PR #9](https://github.com/Vertex-Systems-Network/series-viral-box/pull/9) merged | Encrypted mail queue, signed-in account controls and audited admin support. Live sender and production operator identities remain open. |
 
-**Integrated verification:** 23 worker tests, four media/continuation tests, HTTP fixture smoke, registry baseline, Next.js production build, and NestJS/Next.js HTTP parity passed together. Run `npm ci` then `npm test` and the parity commands below to reproduce the checkpoint.
+**Integrated verification:** 23 worker tests, four media/continuation tests, HTTP fixture smoke, registry baseline, Next.js production build, and NestJS/Next.js HTTP parity passed together. Run `pnpm install --frozen-lockfile` then `pnpm test` and the parity commands below to reproduce the checkpoint.
 
-**AUD-07 viewer transport:** [PR #12](https://github.com/Vertex-Systems-Network/series-viral-box/pull/12) moves the existing fixture account, OAuth, library and media routes into the NestJS entry point through a shared handler. Admin routes are still on the separate loopback service. Run `npm test` and `node scripts/fixture-watch-smoke.mjs --http-only` for worker and transport checks. The Media playback workflow tests the same NestJS transport in Chromium.
+**AUD-07 viewer transport:** [PR #12](https://github.com/Vertex-Systems-Network/series-viral-box/pull/12) moves the existing fixture account, OAuth, library and media routes into the NestJS entry point through a shared handler. Admin routes are still on the separate loopback service. Run `pnpm test` and `node scripts/fixture-watch-smoke.mjs --http-only` for worker and transport checks. The Media playback workflow tests the same NestJS transport in Chromium.
 
 **AUD-07 same-origin fixture:** [PR #13](https://github.com/Vertex-Systems-Network/series-viral-box/pull/13) connects the existing viewer catalog and media routes through the Next.js origin. The built-app parity test verifies a session cookie round trip, cross-origin mutation rejection, a signed download range, HEAD semantics, and admin isolation.
 
@@ -32,3 +32,6 @@
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
 
 **P0-01 infrastructure checkpoint:** [PR #18](https://github.com/Vertex-Systems-Network/series-viral-box/pull/18) defines the local PostgreSQL, Redis and object storage setup and its CI round trips. Continue workspace tooling and service-shell acceptance separately. Docker is unavailable in this environment, so the live stack is checked in Actions.
+
+
+**P0-01 workspace checkpoint:** [PR #19](https://github.com/Vertex-Systems-Network/series-viral-box/pull/19) adds the root pnpm workspace and frozen lock. It preserves the standalone Expo harness lock. Once merged with passing clean-install CI, return to the next ready non-design backlog task and retain device acceptance as a separate gate.

@@ -6,11 +6,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PGlite } from '@electric-sql/pglite';
-import next from 'next';
+import { createRequire } from 'node:module';
 import { createCatalogApp } from '../apps/api/catalog-app.mjs';
 import { migrateCatalog } from '../apps/worker/migrate-catalog.mjs';
 import { catalogResponse } from '../apps/worker/catalog-api.mjs';
 import { syncCatalog } from '../apps/worker/sync.mjs';
+
+const requireWeb = createRequire(new URL('../apps/web/package.json', import.meta.url));
+const next = requireWeb('next');
 
 test('Nest preserves fixture API responses and Next renders the catalog journey', { timeout: 60000 }, async () => {
   const db = new PGlite();
