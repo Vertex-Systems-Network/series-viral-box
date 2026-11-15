@@ -1,6 +1,6 @@
 # Series Viral Box agent instructions
 
-Start with [project memory](docs/STATE.md), [backlog](docs/BACKLOG.md), [architecture](docs/PLAN.md), and [latest audit](docs/AUDIT.md). Read [design workflow](docs/DESIGN.md) for UI tasks. These files and current Git/CI evidence are the shared project memory.
+Read [STATE.md](docs/STATE.md) first for the active task and resume command, then [BACKLOG.md](docs/BACKLOG.md) for dependency and task status. Use [AUDIT.md](docs/AUDIT.md) for verified evidence and acceptance gaps. Consult [PLAN.md](docs/PLAN.md) when changing architecture and [DESIGN.md](docs/DESIGN.md) when the design track is in scope. The current implementation loop excludes Figma and visual design.
 
 1. Fetch the latest base. Inspect open PRs and dependencies. Claim one ready task by opening a draft PR with its ID before substantial implementation. If a live claim exists, take another task. A stale claim is reassigned only after checking the latest PR activity.
 2. Work on an isolated branch. Write the task outcome, affected contracts, and acceptance checks into the PR. Continue independently through reversible implementation, verification, and recovery within scope.
