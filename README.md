@@ -54,3 +54,6 @@ For a same-origin fixture, set `VIEWER_PUBLIC_ORIGIN=http://127.0.0.1:3000` on N
 ## Native fixture API contract
 
 `apps/mobile/catalog-client.mjs` provides catalog browsing, opaque cursors, title identity, episode progress, and separately scoped fixture media grants. The HTTP parity tests inject a session-aware transport to exercise protected calls. A native production session transport and actual device playback/download are separate milestones. Keep signed media URLs out of logs and persist viewing progress by source, title, locale and episode.
+
+
+The NestJS fixture can issue a native session directly on loopback when both `ENABLE_NATIVE_FIXTURE=1` and `ENABLE_FIXTURE_DEMO=1` are set. Use `createNativeFixtureClient` in `apps/mobile/native-fixture-client.mjs`. Its token stays in memory, expires after one hour, and is revoked on logout. The server stores a domain-separated token hash so browser and native session credentials are isolated. The Next.js public viewer proxy excludes these paths.

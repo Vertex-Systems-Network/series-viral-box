@@ -21,8 +21,8 @@
 
 **AUD-07 native client:** [PR #14](https://github.com/Vertex-Systems-Network/series-viral-box/pull/14) adds a platform-neutral catalog and fixture viewer client. Tests cover paging cursor preservation, title episodes, progress, the signed playback and download contracts, and foreign or mismatched grant rejection.
 
-**Next executable task:** Decide and implement the native session transport and run device integration. Fixture tests inject an authenticated transport. Web session cookies and same-origin checks remain the web contract. Keep native offline downloads pending the product decision and rights constraints.
+**AUD-07 native fixture sessions:** [PR #15](https://github.com/Vertex-Systems-Network/series-viral-box/pull/15) verifies opt-in loopback sign-in, isolated bearer sessions, viewer progress, expiration and logout revocation. Production native identity and device acceptance remain open.
+
+**Next executable task:** Validate the native fixture client on actual target devices after creating the Expo integration and configuring a device-accessible development transport. The loopback fixture session endpoint is intentionally scoped to direct local testing. Production federated sign-in needs an HTTPS origin and a browser-based authorization code flow with PKCE.
 
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
-
-**Active claim:** AUD-07 native fixture sign-in and session lifecycle.

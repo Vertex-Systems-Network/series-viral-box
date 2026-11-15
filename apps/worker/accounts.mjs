@@ -27,13 +27,23 @@ export function sessionHash(cookie) {
 }
 
 export async function sessionUser(db, cookie) {
-  const session = sessionHash(cookie);
+  return sessionUserByHash(db, sessionHash(cookie));
+}
+
+export async function sessionUserByHash(db, session) {
   if (!session) return null;
   const { rows } = await db.query(
     `SELECT u.id, u.email, u.email_verified_at FROM app_session s JOIN app_user u ON u.id = s.user_id
      WHERE s.token_hash = $1 AND s.expires_at > now() AND NOT u.disabled`, [session],
   );
   return rows[0] ?? null;
+}
+
+export async function passwordAccount(db, email, password) {
+  const { rows: [record] } = await db.query(
+    'SELECT id, email, password_hash, disabled FROM app_user WHERE email = $1', [email]);
+  const valid = await passwordMatches(password, record?.password_hash);
+  return valid && record?.password_hash && !record.disabled ? record : null;
 }
 
 export async function accountResponse(db, request, secure = true) {
@@ -102,10 +112,8 @@ export async function accountResponse(db, request, secure = true) {
     if (!rows.length) return reply({ error: 'registration_unavailable' }, 409);
     user = rows[0];
   } else {
-    const { rows } = await db.query('SELECT id, email, password_hash, disabled FROM app_user WHERE email = $1', [email]);
-    const record = rows[0];
-    const valid = await passwordMatches(password, record?.password_hash);
-    if (!valid || !record?.password_hash || record.disabled) return reply({ error: 'invalid_credentials' }, 401);
+    const record = await passwordAccount(db, email, password);
+    if (!record) return reply({ error: 'invalid_credentials' }, 401);
     user = { id: record.id, email: record.email };
   }
 
