@@ -57,3 +57,14 @@ For a same-origin fixture, set `VIEWER_PUBLIC_ORIGIN=http://127.0.0.1:3000` on N
 
 
 The NestJS fixture can issue a native session directly on loopback when both `ENABLE_NATIVE_FIXTURE=1` and `ENABLE_FIXTURE_DEMO=1` are set. Use `createNativeFixtureClient` in `apps/mobile/native-fixture-client.mjs`. Its token stays in memory, expires after one hour, and is revoked on logout. The server stores a domain-separated token hash so browser and native session credentials are isolated. The Next.js public viewer proxy excludes these paths.
+
+
+## Expo device fixture
+
+This standalone harness uses its own dependency lock. From `tools/expo-fixture` run `npm ci`, then `npm run bundle` to export the Android and iOS JavaScript bundles.
+
+1. Sync the fixture catalog and publish an HLS/MP4 fixture using [MEDIA.md](docs/MEDIA.md). Start the NestJS API on port 3103 with `ENABLE_FIXTURE_DEMO=1`, `ENABLE_NATIVE_FIXTURE=1`, the fixture storage path and its signing key. Register a local test viewer at the NestJS catalog before using the device harness.
+2. On an Android emulator or USB-connected development device, run `adb reverse tcp:3103 tcp:3103`, then run `npx expo run:android` from `tools/expo-fixture`. On an iOS simulator hosted on the API machine, run `npx expo run:ios`. The default API URL is `http://localhost:3103`. Set `EXPO_PUBLIC_FIXTURE_ORIGIN` to a different loopback origin if needed. The development app expects direct loopback access and cannot connect to the API from a standalone iOS device on another host.
+3. Sign in, load the HLS player, seek or play, save the position, then reload and verify the seek position. Verify the MP4 download and confirm it completes. The harness removes the temporary cache file. Sign out and check that the player closes. Also retry with media unavailable and after suspending the fixture account.
+
+Device success requires a native build and emulator or hardware. The JavaScript export is a separate verification step. The fixture download does not enable production offline retention.

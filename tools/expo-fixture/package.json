@@ -1,0 +1,18 @@
+{
+  "name": "series-viral-box-expo-fixture",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start --localhost",
+    "bundle": "expo export --platform android --platform ios"
+  },
+  "dependencies": {
+    "expo": "56.0.24",
+    "expo-build-properties": "~56.0.27",
+    "expo-file-system": "~56.0.11",
+    "expo-video": "~56.1.4",
+    "react": "19.2.3",
+    "react-native": "0.85.3"
+  }
+}

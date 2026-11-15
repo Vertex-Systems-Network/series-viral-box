@@ -1,0 +1,29 @@
+name: Expo fixture
+on:
+  pull_request:
+    paths:
+      - 'tools/expo-fixture/**'
+      - 'apps/mobile/**'
+      - '.github/workflows/expo-fixture.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: tools/expo-fixture
+    env:
+      EXPO_NO_TELEMETRY: '1'
+      EXPO_OFFLINE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: tools/expo-fixture/package-lock.json
+      - run: npm ci
+      - run: npm run bundle
