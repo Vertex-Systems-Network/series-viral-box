@@ -57,3 +57,10 @@ For a same-origin fixture, set `VIEWER_PUBLIC_ORIGIN=http://127.0.0.1:3000` on N
 
 
 The NestJS fixture can issue a native session directly on loopback when both `ENABLE_NATIVE_FIXTURE=1` and `ENABLE_FIXTURE_DEMO=1` are set. Use `createNativeFixtureClient` in `apps/mobile/native-fixture-client.mjs`. Its token stays in memory, expires after one hour, and is revoked on logout. The server stores a domain-separated token hash so browser and native session credentials are isolated. The Next.js public viewer proxy excludes these paths.
+
+
+## Local dependency stack
+
+Copy `.env.example` to `.env` and run `docker compose up -d --wait` from the repo root. Compose starts PostgreSQL, Redis and an S3-compatible local object store with loopback-only ports and persistent volumes. Load the example values into your shell with `set -a; source .env; set +a` before running `npm ci` and `npm run sync:fixture`. Keep connection URLs aligned if you change ports or credentials.
+
+Local disk stays the default media store. For the S3 fixture path, use the AWS CLI with `FIXTURE_S3_ENDPOINT` to create the private bucket named by `FIXTURE_MEDIA_BUCKET`, then follow [MEDIA.md](docs/MEDIA.md). Unset `FIXTURE_MEDIA_BUCKET` for local disk publication. Redis is available for queue development. The current sync worker still uses PostgreSQL for checkpoints. Run `docker compose down` to stop the stack and retain fixture data.

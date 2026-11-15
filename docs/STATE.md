@@ -28,3 +28,6 @@
 **Next executable task:** Set up the Expo development build and run the fixture flow on a target device or emulator. The current workspace has no Android SDK tools or iOS simulator. Device-side playback, interruptions and download behavior still need verification. OAuth and offline distribution remain separate production scope.
 
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
+
+
+**P0-01 infrastructure checkpoint:** [PR #18](https://github.com/Vertex-Systems-Network/series-viral-box/pull/18) defines the local PostgreSQL, Redis and object storage setup and its CI round trips. Continue workspace tooling and service-shell acceptance separately. Docker is unavailable in this environment, so the live stack is checked in Actions.
