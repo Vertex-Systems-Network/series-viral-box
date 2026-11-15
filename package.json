@@ -1,0 +1,19 @@
+{
+  "name": "series-viral-box",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "node --test apps/worker/*.test.mjs",
+    "sync:fixture": "node apps/worker/run.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.0",
+    "playwright": "^1.65.1"
+  }
+}

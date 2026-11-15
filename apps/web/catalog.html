@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Series Viral Box</title><link rel="stylesheet" href="/catalog/style.css"></head>
+<body><main>
+<h1>Series Viral Box</h1>
+<button id="account" type="button">Log in</button><button id="verify-email" type="button" hidden>Verify email</button><span id="verification-status" role="status"></span>
+<button id="account-settings" type="button" hidden>Account settings</button>
+<dialog id="account-settings-dialog" aria-labelledby="account-settings-heading">
+<h2 id="account-settings-heading">Account settings</h2>
+<p id="profile-email"></p>
+<form id="change-password">
+<label>Current password <input name="currentPassword" type="password" autocomplete="current-password" required minlength="12" maxlength="128"></label>
+<label>New password <input name="password" type="password" autocomplete="new-password" required minlength="12" maxlength="128"></label>
+<button>Change password</button>
+</form>
+<button id="revoke-other-sessions" type="button">Sign out other sessions</button>
+<p id="account-settings-status" role="status"></p>
+<form method="dialog"><button>Close</button></form>
+</dialog>
+<button id="logout" type="button" hidden>Log out</button>
+<div id="social-linking" hidden></div><p id="social-status" role="status"></p>
+<dialog id="login"><form id="credentials">
+<h2>Log in or register</h2>
+<label>Email <input name="email" type="email" autocomplete="email" required></label>
+<label>Password <input name="password" type="password" minlength="12" maxlength="128" autocomplete="current-password" required></label>
+<p id="account-status" role="status"></p>
+<button name="action" value="login">Log in</button>
+<button name="action" value="register">Register</button>
+<button id="close-login" type="button">Cancel</button>
+</form><button id="forgot-password" type="button">Forgot password?</button><div id="social-login"></div></dialog>
+<dialog id="recovery"><form id="reset-form">
+<h2 id="reset-heading">Reset password</h2>
+<label id="reset-email">Email <input name="email" type="email" autocomplete="email"></label>
+<label id="reset-password" hidden>New password <input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"></label>
+<p id="reset-status" role="status"></p>
+<button id="reset-submit">Continue</button><button id="reset-close" type="button">Close</button>
+</form></dialog>
+<form id="filters"><label>Provider <select name="source"><option value="">All providers</option></select></label>
+<label>Language <input name="locale" placeholder="All languages"></label><button>Apply</button></form>
+<p id="status" role="status"></p><ul id="titles"></ul>
+<button id="more" type="button" hidden>Load more</button>
+<section id="library" hidden><h2>My List</h2><p id="library-status" role="status"></p><ul id="saved-titles"></ul></section>
+<section id="details" hidden aria-labelledby="title"><h2 id="title" tabindex="-1"></h2><p id="synopsis"></p><button id="save-title" type="button" hidden>Save to My List</button><h3>Episodes</h3><ol id="episodes"></ol></section>
+</main><script type="module" src="/catalog/page.mjs"></script></body></html>

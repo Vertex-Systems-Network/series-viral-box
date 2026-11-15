@@ -1,0 +1,14 @@
+{
+  "source": "fixture",
+  "titles": [
+    {
+      "id": "demo-series",
+      "locale": "en",
+      "name": "The Missing Reel",
+      "synopsis": "A fictional catalog entry for local development.",
+      "episodes": [
+        { "id": "demo-1", "number": 1, "name": "First Cut" }
+      ]
+    }
+  ]
+}

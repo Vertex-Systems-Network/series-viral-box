@@ -1,0 +1,19 @@
+name: Media playback
+on: [pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npx playwright install --with-deps chromium
+      - run: node --test apps/web/blob-playback.test.mjs scripts/media-delivery.test.mjs
+      - run: node scripts/fixture-watch-smoke.mjs

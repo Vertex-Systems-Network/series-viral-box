@@ -1,0 +1,22 @@
+name: Source registry
+on:
+  pull_request:
+    paths:
+      - 'data/source-registry.json'
+      - 'scripts/source-registry.mjs'
+      - 'scripts/catalog-coverage.mjs'
+      - 'data/required-sources.json'
+      - '.github/workflows/source-registry.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/source-registry.mjs check data/source-registry.json
+      - run: node scripts/catalog-coverage.mjs

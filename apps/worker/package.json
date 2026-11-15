@@ -1,0 +1,10 @@
+{
+  "name": "@series-viral-box/worker",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "hls.js": "^1.7.4",
+    "jose": "^6.2.17",
+    "pg": "^8.23.1"
+  }
+}
