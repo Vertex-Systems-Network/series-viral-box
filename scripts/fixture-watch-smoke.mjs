@@ -148,6 +148,8 @@ try {
     await recovery.getByRole('button', { name: 'Continue' }).click();
     await recovery.getByText('If the account is eligible, a reset link will arrive by email.').waitFor();
 
+    // Load links as external mail navigation so the catalog processes the new fragment.
+    await recoveryPage.goto('about:blank');
     await recoveryPage.goto(mailLink('reset'));
     const newPassword = 'fixture-password-replaced';
     await recovery.getByLabel('New password').fill(newPassword);
@@ -165,6 +167,7 @@ try {
     await login.getByRole('button', { name: 'Log in', exact: true }).click();
     await recoveryPage.getByRole('button', { name: 'Verify email', exact: true }).click();
     await recoveryPage.getByText('Check your inbox for the verification link.').waitFor();
+    await recoveryPage.goto('about:blank');
     await recoveryPage.goto(mailLink('verify'));
     await recoveryPage.getByText('Email verified.', { exact: true }).waitFor();
     await recoveryPage.getByRole('button', { name: 'Log out', exact: true }).waitFor();
