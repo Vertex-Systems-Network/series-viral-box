@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
 import { createLocalMedia } from './local-media.mjs';
+import { createFixtureCdnProxy } from './fixture-cdn.mjs';
 import { resolveFixtureGrant } from './fixture-grants.mjs';
 import { serveFixtureWatch } from './fixture-watch-routes.mjs';
 import { catalogResponse } from './catalog-api.mjs';
@@ -19,6 +20,9 @@ if (!DATABASE_URL || !MEDIA_ADMIN_TOKEN) throw new Error('Set DATABASE_URL and M
 const local = process.env.MEDIA_SIGNING_KEY
   ? createLocalMedia(process.env.FIXTURE_MEDIA_DIR ?? './var/media', process.env.MEDIA_SIGNING_KEY)
   : null;
+const cdnBase = process.env.FIXTURE_CDN_BASE_URL;
+if (cdnBase && !local) throw new Error('Set MEDIA_SIGNING_KEY to use FIXTURE_CDN_BASE_URL');
+const cdnProxy = cdnBase ? createFixtureCdnProxy(cdnBase) : null;
 const db = new pg.Pool({ connectionString: DATABASE_URL });
 
 const deliverReset = resetMailer(process.env);
@@ -126,7 +130,7 @@ const server = createServer(async (incoming, outgoing) => {
     }
     if (await serveFixtureWatch(incoming, outgoing, url.pathname, Boolean(local))) return;
     if (local && url.pathname.startsWith('/fixture-media/')) {
-      await local.serve(incoming, outgoing, url.pathname);
+      await (cdnProxy ?? local.serve)(incoming, outgoing, url.pathname);
       return;
     }
     if (local && url.pathname === '/admin/fixture-grant') {

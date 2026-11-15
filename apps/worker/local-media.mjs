@@ -3,6 +3,7 @@ import { open, realpath } from 'node:fs/promises';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
+export const fixtureMediaPath = /^\/fixture-media\/(\d{1,12})\/(prefix|object)\/([a-f0-9]{64})\/(fixtures\/[a-f0-9]{64}\/[a-f0-9-]{36}\/)(index\.m3u8|episode\.mp4|segment-\d+\.ts)$/;
 const prefixPattern = /^fixtures\/[a-f0-9]{64}\/[a-f0-9-]{36}\/$/;
 const mediaTypes = {
   'episode.mp4': 'video/mp4',
@@ -24,7 +25,7 @@ export function createLocalMedia(directory, secret) {
     },
 
     async serve(request, response, pathname) {
-      const match = /^\/fixture-media\/(\d{1,12})\/(prefix|object)\/([a-f0-9]{64})\/(fixtures\/[a-f0-9]{64}\/[a-f0-9-]{36}\/)(index\.m3u8|episode\.mp4|segment-\d+\.ts)$/.exec(pathname);
+      const match = fixtureMediaPath.exec(pathname);
       if (!match) return response.writeHead(404).end();
       const [, rawExpiry, scope, signature, prefix, file] = match;
       const expiry = Number(rawExpiry);

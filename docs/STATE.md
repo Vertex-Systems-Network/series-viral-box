@@ -12,4 +12,6 @@
 
 **First task:** AUD-01. Add repeatable account browser coverage for password reset and verification using injected mail, without waiting for live credentials. Start from scripts/fixture-watch-smoke.mjs and the recovery/verification worker tests. Then take another ready item in backlog order. No production release while P0 findings remain open.
 
+**AUD-06:** [Draft PR #7](https://github.com/Vertex-Systems-Network/series-viral-box/pull/7) adds same-origin CDN fixture delivery and a token-gated private fixture origin. The local CDN stand-in checks decodable HLS and MP4, HEAD/ranges, signature scope and credential isolation. Live CDN and origin access remain external dependencies. Next is AUD-07, design acceptance and Next.js/NestJS contract parity.
+
 **External dependencies:** Complete licensed provider inventories, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Work on fixtures, contract tests and design can proceed independently.
