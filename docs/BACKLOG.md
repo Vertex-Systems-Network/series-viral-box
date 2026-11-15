@@ -6,13 +6,13 @@ This table is the source of truth for task status. GitHub issues can mirror task
 | --- | --- | --- | --- |
 | P0-01 | Done | Planning PR merged | Bootstrap pnpm workspace, service shells, local Postgres/Redis/object storage, env example and CI. New checkout starts from documented commands. |
 | P0-02 | Blocked | Planning PR merged | Register all supplied ReelFren and DramaFren variants with audit status. Select fixture source and track one live source with inventory, rate limits, media and rights evidence. Fixture work can proceed independently. |
-| P1-01 | Ready | P0-01 | Create schema/migrations and seed fixtures. Prove identity uniqueness, locale variants and rights expiry. |
+| P1-01 | In progress | P0-01 | Create schema/migrations and seed fixtures. Prove identity uniqueness, locale variants and rights expiry. |
 | P1-02 | Planned | P1-01 | Implement catalog REST API and generated clients. Verify cursor pagination, provider filters and contract generation. |
 | P2-01 | Planned | P1-01 | Build adapter interface and fixture backfill/incremental sync. Verify transaction, checkpoint recovery and deletion handling. |
 | P2-02 | Planned | P2-01 | Add source health, admin resync, contract drift detection, rate-limit retries and incomplete-run protection. |
 | P3-01 | Planned | P2-01 | Build on the verified local fixture packaging command to add ingest worker and storage pipeline. Verify HLS + MP4 output, atomic publish and idempotent retries. |
 | P3-02 | Planned | P3-01, P1-02 | Implement playback and download grants. Verify permissions, expiration, removed titles and a failed replacement. |
-| P4-01 | Ready | Planning PR merged | Design AI finishes responsive web, mobile and admin spec and records visual QA acceptance. |
+| P4-01 | Planned | Planning PR merged | Design track owns the responsive web, mobile and admin spec and visual QA. Outside the current implementation loop. |
 | P4-02 | Planned | P4-01, P1-02 | Implement web catalog, detail and search against shared API. Verify responsive layouts and keyboard navigation. |
 | P4-03 | Planned | P4-02, P3-02 | Implement web player/download and admin sync/asset pages. Verify complete fixture flow and failure states. |
 | P5-01 | Planned | P4-01, P1-02 | Implement native navigation, catalog and details. Verify iOS and Android layouts. |
@@ -26,7 +26,7 @@ This table is the source of truth for task status. GitHub issues can mirror task
 
 ## Post-audit execution queue
 
-Use this queue for current task selection. The phase table above defines delivery gates. Fixture completion does not close a production phase. Draft work remains in review until merged.
+Use the active task in STATE.md first. Then select the next ready, in-scope item across both tables. The phase table defines delivery gates. Fixture completion does not close a production phase. Draft work remains in review until merged.
 
 | ID | Status | Dependency | Acceptance evidence |
 | --- | --- | --- | --- |
@@ -41,7 +41,7 @@ Use this queue for current task selection. The phase table above defines deliver
 
 Draft pull requests, integrated test evidence, and the next action are in [STATE.md](STATE.md).
 
-AUD-07 continues in [PR #11](https://github.com/Vertex-Systems-Network/series-viral-box/pull/11).
+AUD-07 fixture transport and Expo exports are merged through [PR #17](https://github.com/Vertex-Systems-Network/series-viral-box/pull/17). Actual device acceptance is pending. P1-01 is claimed in [PR #21](https://github.com/Vertex-Systems-Network/series-viral-box/pull/21).
 
 ## Task card
 

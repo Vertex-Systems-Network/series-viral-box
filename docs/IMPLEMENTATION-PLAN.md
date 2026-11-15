@@ -8,17 +8,16 @@ The user-supplied ReelFren and DramaFren inventories are mandatory discovery inp
 
 ## 2. Current implementation and evidence
 
-| Area | Implemented and tested scope | Production evidence still needed |
+| Area | Verified fixture capability | Production acceptance still open |
 | --- | --- | --- |
-| Sources | 139 required source identities, partial public collectors, import and episode coverage comparison | Complete title and episode inventories and documented production feeds |
-| Catalog | PostgreSQL snapshot import, page transactions, checkpoint recovery, final-page watermarks, read API and fixture browse UI | Versioned migrations, production API contracts, durable operational jobs |
-| Media | Fixture MP4 and HLS packaging, local disk publication, optional S3 fixture upload, CDN configuration, signed local grants and Chromium blob playback | Private origin/CDN verification, production asset workflow and entitlement |
-| Viewer accounts | Email registration/login/logout, login dialog, reset, email verification, My List and resume | Real mail, recovery and verification browser coverage, profile and account lifecycle |
-| Social login | Google and Apple settings, redirects and callback validation | Successful token exchange tests, explicit linking and live sign-in |
-| Administration | User listing and enable/disable API, OAuth switches, CDN setting | Admin UI, permissions, audit trail, queue and publication controls |
-| AI workflow | In-session continuation, Git handoffs, manually started command runner | Keep execution evidence and next task current across agents |
+| Sources | 139 registered identities, partial collectors, and pilot evidence gate | Complete inventory, documented limits and approved distribution |
+| Catalog | Transactional replay, checkpoints, migrations and read API | Shared generated API contract, production jobs and restore test |
+| Media | HLS and MP4 packaging, signed grants, private origin/CDN stand-in and CI playback | Durable ingest, production entitlement enforcement and deployed CDN |
+| Accounts | Recovery and verification in Chromium, linking with signed provider fixtures, durable mail and audited support | Live OAuth, configured mail sender and production operator identity |
+| Platforms | NestJS and Next.js parity, native fixture bearer sessions, Expo exports | Emulator and device testing, production native authentication |
+| Workspace | Frozen pnpm install and local PostgreSQL, Redis and private S3 checks | Production environment and worker queue integration |
 
-See [audit findings](AUDIT.md), [baseline evidence](STATE.md) and [source inventory](SOURCES.md). Prior fixture passes establish local scope. Check the current commit before relying on CI results.
+See [AUDIT.md](AUDIT.md) and [STATE.md](STATE.md) for evidence links and the active checkpoint.
 
 ## 3. Target architecture
 
@@ -31,7 +30,7 @@ See [audit findings](AUDIT.md), [baseline evidence](STATE.md) and [source invent
 | Workers | Redis and BullMQ | Bounded provider sync, ingestion, mail and retry jobs |
 | Storage and delivery | Local disk default, optional S3-compatible storage and CDN | Verify assets before publication and issue short-lived media access |
 
-The existing npm workspace, plain Node service and fixture UI are the starting point. Establish contract parity before switching callers. Follow [architecture](PLAN.md) and record changes to target choices as ADRs.
+The existing pnpm workspace, fixture routes and Expo harness are the implementation baseline. Establish contract parity before switching callers. Follow [architecture](PLAN.md) and record changes to target choices as ADRs.
 
 ## 4. Catalog sync and completeness
 
@@ -70,20 +69,9 @@ Issue grants after checking session, viewer status, episode access, territory, d
 | P6 | Live pilot and release readiness | One complete licensed series passes live sync, new episode update, playback, download where eligible, backup restore and rollback. |
 | P7 | Provider expansion | Qualify each connector, preserve required providers and variants, reconcile episode coverage and track ongoing changes. |
 
-## 8. Next execution queue
+## 8. Execution order
 
-Use [BACKLOG.md](BACKLOG.md) as the status authority. Take the first eligible task and continue within the active session after recording evidence. These are the current acceptance goals.
-
-| Task | Expected output |
-| --- | --- |
-| AUD-01 | Chromium tests for reset and verification with injected mail, including revoked sessions and verified status |
-| AUD-02 | Production entitlement design and tests for account status, rights window, territory, expiry and revocation |
-| AUD-03 | Versioned migrations with clean install and existing data upgrade tests |
-| AUD-04 | Successful and rejected OAuth exchange tests, explicit linking, live tests when credentials exist |
-| AUD-05 | Separate directory discovery from provider inventory and catalog coverage from media coverage |
-| AUD-06 | CDN delivery against a private fixture origin, followed by live provider verification |
-| AUD-07 | Final design specification and Next.js/NestJS migration with contract parity, followed by Expo |
-| AUD-08 | Durable mail, account settings, admin management UI and audited support actions |
+Open [STATE.md](STATE.md) for the active claim and exact resume command. Use [BACKLOG.md](BACKLOG.md) as the sole status and dependency authority. After a checkpoint, commit test evidence and select the next ready in-scope task. Continue independent fixture work when live provider credentials, distribution scope or device tooling are unavailable. Keep production acceptance and device evidence separate from fixture and bundle verification.
 
 ## 9. Agent execution and handoff
 

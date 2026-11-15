@@ -1,4 +1,27 @@
-# Draft PR 1 baseline audit
+# Implementation audit
+
+## Current checkpoint — 2026-11-15
+
+Scope is repository and CI evidence through [PR #20](https://github.com/Vertex-Systems-Network/series-viral-box/pull/20). Task states live in [BACKLOG.md](BACKLOG.md) and the active branch and next command live in [STATE.md](STATE.md).
+
+| Priority | Verified capability | Remaining acceptance |
+| --- | --- | --- |
+| P0 | Loopback admin, NestJS fixture API, Next.js viewer proxy and isolated native sessions. | Production public and operator identity, environment separation and request authorization. |
+| P0 | Policy tests cover territory, access windows and grant expiry. Fixture HLS and MP4 signing and decoding passed locally and in CI. | Persist episode rights in P1-01 and enforce grants at the production API and delivery boundary, including revocation. |
+| P0 | Registry contains 139 identities, including two discovery roots. The pilot gate checks evidence separately. | Authoritative inventory, documented rate limits, approved masters and distribution rights for the selected live candidate. |
+| P1 | Versioned migrations, replay and rollback tests, PostgreSQL CI and frozen pnpm installation. | P1-01 rights windows and production restore evidence. |
+| P1 | Signed Google and Apple fixtures, explicit account linking, durable account mail and audited fixture support. | Live provider callbacks on HTTPS, mail deliverability and authenticated operator identities. |
+| P1 | Next.js/NestJS HTTP and Chromium parity, native fixture grants and Expo JavaScript exports for Android and iOS. | Device or emulator runs, production native authentication and platform acceptance. |
+| P1 | Private S3 round trip and local CDN stand-in checks. | Configured production storage/CDN, origin authorization and deployed round trip. |
+| P2 | Manually started continuation supervisor with tested leases and blocked dependency isolation. | Keep the repo backlog and handoff current during task execution. |
+
+CI checkpoints are linked from [STATE.md](STATE.md). A fixture or export check closes its own acceptance item. Production release still depends on the applicable phase gates and maintainer review.
+
+---
+
+## Historical baseline
+
+### Draft PR 1 baseline audit
 
 Baseline commit: aa2e72ca169d5592fa1916a795fea206cf7f2609. Scope: repo tree and PR change inventory, worker entry points and core persistence/contracts, browser and CI evidence, phase and handoff consistency. This is a static and test-evidence audit. Deployment access and third-party credentials were unavailable for live qualification.
 
