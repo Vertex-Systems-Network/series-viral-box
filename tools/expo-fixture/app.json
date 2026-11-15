@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Series Viral Box Fixture",
+    "slug": "series-viral-box-fixture",
+    "version": "0.1.0",
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "android": {
+      "package": "com.seriesviralbox.fixture"
+    },
+    "ios": {
+      "bundleIdentifier": "com.seriesviralbox.fixture",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
+      }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ]
+  }
+}
