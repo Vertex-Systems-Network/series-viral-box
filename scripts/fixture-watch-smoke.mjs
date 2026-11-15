@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { createServer } from 'node:http';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { PGlite } from '@electric-sql/pglite';
@@ -45,7 +46,8 @@ try {
   let origin = await app.getUrl();
   if (process.argv.includes('--next')) {
     process.env.CATALOG_API_URL = origin;
-    const { default: next } = await import('next');
+    const requireWeb = createRequire(new URL('../apps/web/package.json', import.meta.url));
+    const next = requireWeb('next');
     web = next({ dir: fileURLToPath(new URL('../apps/web', import.meta.url)), dev: false, quiet: true });
     await web.prepare();
     server = createServer(web.getRequestHandler());

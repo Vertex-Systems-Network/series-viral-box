@@ -38,7 +38,7 @@ Run `node --test apps/web/blob-playback.test.mjs scripts/media-delivery.test.mjs
 
 ## Fixture watch page
 
-Start the signed local media service and get a playback grant with the authenticated admin endpoint. Open `/fixture-watch#grant=ENCODED_GRANT` on the same service, encoding the relative grant with URLSearchParams or encodeURIComponent. hls.js is served locally. The fragment keeps the grant out of the watch page HTTP request. Run `node scripts/fixture-watch-smoke.mjs --http-only` to check the route and assets, or run without the flag for Chromium playback. For browser mode use `npx playwright install chromium` or set CHROMIUM_BIN to an installed Chromium.
+Start the signed local media service and get a playback grant with the authenticated admin endpoint. Open `/fixture-watch#grant=ENCODED_GRANT` on the same service, encoding the relative grant with URLSearchParams or encodeURIComponent. hls.js is served locally. The fragment keeps the grant out of the watch page HTTP request. Run `node scripts/fixture-watch-smoke.mjs --http-only` to check the route and assets, or run without the flag for Chromium playback. For browser mode use `pnpm exec playwright install chromium` or set CHROMIUM_BIN to an installed Chromium.
 
 ## Production grant policy
 

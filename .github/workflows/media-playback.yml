@@ -11,12 +11,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-      - run: npm ci
+      - run: npm install --global pnpm@11.25.0
+      - run: pnpm install --frozen-lockfile
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - run: npx playwright install --with-deps chromium
+      - run: pnpm exec playwright install --with-deps chromium
       - run: node --test apps/web/blob-playback.test.mjs scripts/media-delivery.test.mjs
-      - run: npm run -w @series-viral-box/web build
+      - run: pnpm --filter @series-viral-box/web build
         env:
           NEXT_TELEMETRY_DISABLED: '1'
       - run: node scripts/fixture-watch-smoke.mjs --next
