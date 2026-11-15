@@ -30,7 +30,7 @@ Use this queue for current task selection. The phase table above defines deliver
 
 | ID | Status | Dependency | Acceptance evidence |
 | --- | --- | --- | --- |
-| AUD-01 | In progress | Local account APIs | Extend Chromium coverage to request and consume reset and verification links via a test mail transport. Verify revoked session and visible verified status. |
+| AUD-01 | In review | Local account APIs | Extend Chromium coverage to request and consume reset and verification links via a test mail transport. Verify revoked session and visible verified status. |
 | AUD-02 | Ready | Local media pipeline | Specify and test production playback/download entitlement, disabled viewer behavior, territory/window checks, and existing grant expiry/revocation. |
 | AUD-03 | Ready | Fixture schema | Introduce versioned migrations and test clean DB plus upgrade of existing catalog/account/asset records. |
 | AUD-04 | Ready | OAuth callback code | Test successful and rejected token exchange with fixtures, then implement explicit authenticated linking. Live provider test needs HTTPS and real credentials. |
@@ -39,7 +39,7 @@ Use this queue for current task selection. The phase table above defines deliver
 | AUD-07 | Ready | Target architecture | Finalize design spec and move fixture UI/API toward Next.js and NestJS with contract parity. Start Expo after shared contracts are stable. |
 | AUD-08 | Ready | Account recovery APIs | Add durable mail delivery, signed-in profile/password/session controls, admin UI and audit events. Live delivery needs configured sender. |
 
-AUD-01 is claimed on `codex/aud-01-account-browser`.
+AUD-01 evidence and the next action are in [STATE.md](STATE.md).
 
 ## Task card
 
