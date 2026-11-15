@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { migrateCatalog } from './migrate-catalog.mjs';
 import pg from 'pg';
 import { runSync } from './run-sync.mjs';
 import { loadFixtureAdapter } from './adapter.mjs';
@@ -11,11 +11,10 @@ if (args.length && (args.length !== 2 || args[0] !== '--inventory' || !args[1]))
 }
 const adapter = args.length ? await loadInventoryAdapter(args[1]) : await loadFixtureAdapter();
 if (!process.env.DATABASE_URL) throw new Error('Set DATABASE_URL before running catalog sync');
-const schema = await readFile(new URL('../../db/catalog.sql', import.meta.url), 'utf8');
 const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
 try {
   await client.connect();
-  await client.query(schema);
+  await migrateCatalog(client);
   console.log(await runSync(client, adapter));
 } finally {
   await client.end();

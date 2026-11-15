@@ -2,18 +2,22 @@ import pg from 'pg';
 
 export async function exportCatalogInventory(db) {
   const { rows } = await db.query(
-    `SELECT source, title_id AS "titleId", locale, upstream_id AS "episodeId"
-       FROM catalog_episode
-      ORDER BY source, title_id, locale, upstream_id`,
+    `SELECT t.source, t.upstream_id AS "titleId", t.locale, e.upstream_id AS "episodeId"
+       FROM catalog_title t
+       LEFT JOIN catalog_episode e ON (e.source, e.title_id, e.locale) = (t.source, t.upstream_id, t.locale)
+      ORDER BY t.source, t.locale, t.upstream_id, e.upstream_id`,
   );
   const grouped = new Map();
-  for (const { source, ...episode } of rows) {
-    // Fixtures and other internal namespaces are outside the registry.
-    if (!source.includes('/')) continue;
-    if (!grouped.has(source)) grouped.set(source, { source, episodes: [] });
-    grouped.get(source).episodes.push(episode);
+  for (const { source, titleId, locale, episodeId } of rows) {
+    // Fixtures and directory roots are outside provider coverage.
+    if (!source.includes('/') || source.startsWith('directory/')) continue;
+    const key = JSON.stringify([source, locale]);
+    if (!grouped.has(key)) grouped.set(key, { source, locale, titles: [], episodes: [] });
+    const inventory = grouped.get(key);
+    if (inventory.titles.at(-1)?.titleId !== titleId) inventory.titles.push({ titleId });
+    if (episodeId !== null) inventory.episodes.push({ titleId, episodeId });
   }
-  return [...grouped.values()];
+  return { version: 2, inventories: [...grouped.values()] };
 }
 
 export async function readDatabaseInventory(connectionString) {

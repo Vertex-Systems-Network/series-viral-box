@@ -192,6 +192,10 @@ function showAccount(user) {
   refreshLibrary();
   byId('account').hidden = Boolean(user);
   byId('logout').hidden = !user;
+  byId('account-settings').hidden = !user;
+  byId('profile-email').textContent = user?.email ?? '';
+  if (!user) byId('account-settings-dialog').close();
+  byId('social-linking').hidden = !user;
 }
 byId('account').addEventListener('click', () => dialog.showModal());
 byId('close-login').addEventListener('click', () => dialog.close());
@@ -234,14 +238,64 @@ byId('logout').addEventListener('click', async () => {
 });
 fetch('/v1/account/session').then(response => response.json()).then(({ user }) => showAccount(user)).catch(() => {});
 
+const settings = byId('account-settings-dialog');
+const changePassword = byId('change-password');
+const accountSettingsStatus = byId('account-settings-status');
+const revokeSessions = byId('revoke-other-sessions');
+byId('account-settings').addEventListener('click', () => settings.showModal());
+settings.addEventListener('close', () => {
+  accountSettingsStatus.textContent = '';
+  changePassword.reset();
+});
+changePassword.addEventListener('submit', async event => {
+  event.preventDefault();
+  const button = changePassword.querySelector('button');
+  button.disabled = true;
+  try {
+    const response = await fetch('/v1/account/change-password', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.fromEntries(new FormData(changePassword))),
+    });
+    if (!response.ok) throw new Error();
+    changePassword.reset();
+    accountSettingsStatus.textContent = 'Password changed. Other sessions were signed out.';
+  } catch {
+    accountSettingsStatus.textContent = 'Could not change the password. Check your current password.';
+  } finally {
+    button.disabled = false;
+  }
+});
+revokeSessions.addEventListener('click', async () => {
+  revokeSessions.disabled = true;
+  try {
+    const response = await fetch('/v1/account/revoke-other-sessions', { method: 'POST' });
+    if (!response.ok) throw new Error();
+    accountSettingsStatus.textContent = 'Other sessions were signed out.';
+  } catch {
+    accountSettingsStatus.textContent = 'Could not sign out other sessions.';
+  } finally {
+    revokeSessions.disabled = false;
+  }
+});
+
 const oauthResult = new URLSearchParams(location.search).get('oauth');
-if (oauthResult === 'failed') status.textContent = 'Social sign-in failed. Try again or log in with email.';
+const socialStatus = byId('social-status');
+if (oauthResult === 'failed') socialStatus.textContent = 'Social sign-in failed. Try again or log in with email.';
+if (oauthResult === 'linked') socialStatus.textContent = 'Social account linked.';
+if (oauthResult === 'link-failed') socialStatus.textContent = 'Could not link this social account.';
 fetch('/v1/oauth/providers').then(response => response.json()).then(({ providers }) => {
   for (const provider of providers) {
     const link = document.createElement('a');
     link.href = '/v1/oauth/' + provider + '/start';
     link.textContent = provider === 'google' ? 'Continue with Google' : 'Continue with Apple';
     byId('social-login').append(link, document.createElement('br'));
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = '/v1/oauth/' + provider + '/link';
+    const button = document.createElement('button');
+    button.textContent = provider === 'google' ? 'Link Google account' : 'Link Apple account';
+    form.append(button);
+    byId('social-linking').append(form);
   }
 }).catch(() => {});
 

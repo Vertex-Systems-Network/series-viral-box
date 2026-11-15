@@ -14,6 +14,16 @@ Publication writes into an attempt-specific object prefix and sets available_at 
 
 After schema initialization, set DATABASE_URL and MEDIA_ADMIN_TOKEN and run `node apps/worker/media-admin.mjs`. The service listens on loopback port 3101 by default. Send an authenticated GET or PUT to /admin/media-settings. PUT accepts a JSON body such as `{"cdnBaseUrl":"https://cdn.example.com/media/"}` or `{"cdnBaseUrl":null}` to clear it. Configure the CDN origin with your CDN provider. This setting passes the delivery base to the grant signer. It does not provision DNS, upload credentials, or a CDN distribution. Local signed serving is available below. CDN-backed signing still requires a configured CDN signer and origin. The HLS grant requests prefix scope for its playlist and segments. MP4 requests exact-object scope.
 
+## Deliver fixtures through a private origin
+
+Start `node apps/worker/fixture-origin.mjs` with `FIXTURE_MEDIA_DIR`, `MEDIA_SIGNING_KEY` and a separate `FIXTURE_ORIGIN_TOKEN` of at least 32 bytes. The origin binds to loopback on port 3102 by default. Use the same absolute media path and signing key as the fixture publisher and grant service. Expose the origin only through private connectivity or a trusted tunnel.
+
+Configure the CDN route to strip its delivery prefix, forward the full signed fixture path and Range header, and inject `X-Fixture-Origin-Token` from CDN-side secret configuration. Overwrite any incoming value of that header. Disable caching and compression for this route so each request reaches the signature check and byte lengths remain accurate. The private origin requires both the CDN token and a current, correctly scoped signature.
+
+Set the HTTPS `FIXTURE_CDN_BASE_URL` on the loopback media-admin service to enable same-origin proxying. Set it to the CDN delivery prefix, for example `https://cdn.example.com/delivery/`. Viewer and admin grants still reference the application's fixture path. The app forwards only the media method and range metadata, keeps viewer cookies and credentials local, and rejects upstream redirects. The database CDN setting remains metadata for signer integrations. The proxy destination comes from server configuration.
+
+`node --test scripts/media-delivery.test.mjs` decodes HLS and MP4 through both local and CDN fixture paths. It checks HEAD, ranges, scoped signatures, anonymous origin rejection, and credential isolation through a local CDN stand-in. Live delivery still needs configured CDN and private origin access, including access to the fixture assets. This route implements the fixture grant contract and has no production account or rights checks at the origin.
+
 ## Serve local fixture media
 
 Set MEDIA_SIGNING_KEY to a secret of at least 32 bytes and start the loopback media admin service. With an admin bearer token, POST to `/admin/fixture-grant?titleId=demo-series&locale=en&episodeId=demo-1&kind=playback`. Use kind=download for the MP4 attachment. Resolve the returned relative URL against the media service origin. HLS segments use the same signed path prefix as the playlist. The media route supports GET, HEAD and single byte ranges. The local signer applies only to assets published to the configured local disk directory.
@@ -29,3 +39,16 @@ Run `node --test apps/web/blob-playback.test.mjs scripts/media-delivery.test.mjs
 ## Fixture watch page
 
 Start the signed local media service and get a playback grant with the authenticated admin endpoint. Open `/fixture-watch#grant=ENCODED_GRANT` on the same service, encoding the relative grant with URLSearchParams or encodeURIComponent. hls.js is served locally. The fragment keeps the grant out of the watch page HTTP request. Run `node scripts/fixture-watch-smoke.mjs --http-only` to check the route and assets, or run without the flag for Chromium playback. For browser mode use `npx playwright install chromium` or set CHROMIUM_BIN to an installed Chromium.
+
+## Production grant policy
+
+The policy in `apps/worker/media-entitlement.mjs` evaluates trusted server facts for both grant issuance and media requests. The production API and private delivery path must supply those facts and enforce the result.
+
+- Resolve the active session from the account store. Require an enabled viewer who owns that session. Invalidate the viewer's sessions when suspending the account so restoring access requires a fresh session.
+- Obtain the territory from trusted ingress using its canonical country code. Strip client-supplied territory headers at the trust boundary. Deny requests with unknown territory, including when the permission explicitly covers all territories with `*`.
+- Evaluate rights and asset availability for the canonical episode identity and requested action. Playback requires a published HLS rendition and download requires a published MP4 plus a separate download permission. Rights start times are inclusive and end times are exclusive. Use UTC epoch milliseconds from the server clock.
+- Expire grants at the earliest of five minutes, session expiry, or the applicable rights end. Bind each grant to the action, episode, territory, viewer, session, asset version, and rights revision. Use a new rights revision for every rights update and an immutable version for every published asset replacement.
+- Resolve claims from an opaque server-held grant or authenticated token. Re-evaluate current facts before every playlist, segment, MP4, HEAD, and range response, including cache hits. Scope playback to the asset's HLS objects and download to the exact MP4. Keep the object origin private and require authorization at the delivery path before releasing bytes.
+- Reject the next request after logout, password reset, suspension, a rights change, or asset withdrawal. Requests authorized before the change may finish and clients can retain bytes already received. Short-lived bearer CDN URLs alone cannot enforce this revocation contract.
+
+The worker tests use synthetic facts and cover both actions, territory, window boundaries, expiry and revocation. The loopback fixture signer continues to use its local fixture contract. Production request enforcement and private origin validation belong to the API and CDN integration.

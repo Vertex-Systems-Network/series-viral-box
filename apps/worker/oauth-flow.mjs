@@ -1,6 +1,6 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { createRemoteJWKSet, importPKCS8, jwtVerify, SignJWT } from 'jose';
-import { createAccountSession } from './accounts.mjs';
+import { createRemoteJWKSet, customFetch, importPKCS8, jwtVerify, SignJWT } from 'jose';
+import { createAccountSession, sessionHash } from './accounts.mjs';
 
 const providers = {
   google: {
@@ -20,8 +20,8 @@ const random = () => randomBytes(32).toString('hex');
 const digest = value => createHash('sha256').update(value).digest('hex');
 const headers = { 'Cache-Control': 'no-store' };
 
-export async function oauthResponse(db, url, method, incoming, env = process.env) {
-  const match = /^\/v1\/oauth\/(google|apple)\/(start|callback)$/.exec(url.pathname);
+export async function oauthResponse(db, url, method, incoming, env = process.env, transport = fetch) {
+  const match = /^\/v1\/oauth\/(google|apple)\/(start|link|callback)$/.exec(url.pathname);
   if (!match && url.pathname !== '/v1/oauth/providers') return null;
   const configured = env.AUTH_PUBLIC_ORIGIN ? new URL(env.AUTH_PUBLIC_ORIGIN) : null;
   const origin = configured?.protocol === 'https:' && configured.origin === env.AUTH_PUBLIC_ORIGIN
@@ -43,14 +43,25 @@ export async function oauthResponse(db, url, method, incoming, env = process.env
   const cookieName = 'svb_oauth_' + provider;
   const callbackCookie = (value, age) =>
     `${cookieName}=${value}; Path=${callbackPath}; HttpOnly; Secure; SameSite=None; Max-Age=${age}`;
-  if (action === 'start') {
-    if (method !== 'GET') return new Response(null, { status: 405, headers });
+  if (action === 'start' || action === 'link') {
+    const linking = action === 'link';
+    if (method !== (linking ? 'POST' : 'GET')) return new Response(null, { status: 405, headers });
+    if (linking && incoming.headers.origin !== origin) return new Response(null, { status: 403, headers });
+    const linkSession = linking ? sessionHash(incoming.headers.cookie) : null;
+    if (linking && !linkSession) return new Response(null, { status: 401, headers });
     const state = random();
     const browser = random();
     const nonce = random();
     await db.query('DELETE FROM oauth_attempt WHERE expires_at <= now()');
-    await db.query('INSERT INTO oauth_attempt (state, provider, browser_hash, nonce) VALUES ($1,$2,$3,$4)',
-      [state, provider, digest(browser), nonce]);
+    const { rows: [attempt] } = await db.query(
+      `INSERT INTO oauth_attempt (state, provider, browser_hash, nonce, link_session_hash)
+       SELECT $1, $2, $3, $4, $5::text WHERE $5::text IS NULL OR EXISTS (
+         SELECT 1 FROM app_session s JOIN app_user u ON u.id = s.user_id
+         WHERE s.token_hash = $5 AND s.expires_at > now() AND NOT u.disabled
+       ) RETURNING state`,
+      [state, provider, digest(browser), nonce, linkSession],
+    );
+    if (!attempt) return new Response(null, { status: 401, headers });
     const target = new URL(endpoints.authorize);
     target.search = new URLSearchParams({
       client_id: settings.client_id, redirect_uri: redirectUri, response_type: 'code',
@@ -81,13 +92,14 @@ export async function oauthResponse(db, url, method, incoming, env = process.env
     .exec(incoming.headers.cookie ?? '')?.[1];
   if (!state || !/^[a-f0-9]{64}$/.test(state) || !cookie) return new Response(null, { status: 400, headers });
   const { rows: [attempt] } = await db.query(
-    'DELETE FROM oauth_attempt WHERE state=$1 AND provider=$2 AND browser_hash=$3 AND expires_at > now() RETURNING nonce',
+    'DELETE FROM oauth_attempt WHERE state=$1 AND provider=$2 AND browser_hash=$3 AND expires_at > now() RETURNING nonce, link_session_hash',
     [state, provider, digest(cookie)],
   );
   if (!attempt) return new Response(null, { status: 400, headers });
 
-  const redirect = session => {
-    const result = new Headers({ ...headers, Location: '/catalog?oauth=' + (session ? 'ok' : 'failed') });
+  const redirect = (session, linked = false) => {
+    const outcome = attempt.link_session_hash ? (linked ? 'linked' : 'link-failed') : (session ? 'ok' : 'failed');
+    const result = new Headers({ ...headers, Location: '/catalog?oauth=' + outcome });
     result.append('Set-Cookie', callbackCookie('', 0));
     if (session) result.append('Set-Cookie', session.headers.get('set-cookie'));
     return new Response(null, { status: 303, headers: result });
@@ -100,19 +112,33 @@ export async function oauthResponse(db, url, method, incoming, env = process.env
       .setIssuer(settings.team_id).setSubject(settings.client_id).setAudience(endpoints.issuer)
       .setIssuedAt().setExpirationTime('5m')
       .sign(await importPKCS8(env.APPLE_PRIVATE_KEY.replaceAll('\\n', '\n'), 'ES256'));
-    const token = await fetch(endpoints.token, {
+    const token = await transport(endpoints.token, {
       method: 'POST', redirect: 'error', signal: AbortSignal.timeout(10000),
       body: new URLSearchParams({ code, client_id: settings.client_id, client_secret: secret,
         redirect_uri: redirectUri, grant_type: 'authorization_code' }),
     });
     if (!token.ok) return redirect();
     const { id_token: idToken } = await token.json();
-    const { payload } = await jwtVerify(idToken, createRemoteJWKSet(new URL(endpoints.keys)), {
+    const { payload } = await jwtVerify(idToken, createRemoteJWKSet(new URL(endpoints.keys), { [customFetch]: transport }), {
       issuer: endpoints.issuer, audience: settings.client_id, algorithms: ['RS256'],
       requiredClaims: ['exp', 'sub', 'nonce'],
     });
-    if (payload.nonce !== attempt.nonce || !payload.sub ||
+    if (payload.nonce !== attempt.nonce || typeof payload.sub !== 'string' || !payload.sub ||
         (payload.azp && payload.azp !== settings.client_id)) return redirect();
+
+    if (attempt.link_session_hash) {
+      const presentedSession = sessionHash(incoming.headers.cookie);
+      if (presentedSession && presentedSession !== attempt.link_session_hash) return redirect();
+      const { rows: [linked] } = await db.query(
+        `INSERT INTO oauth_identity (provider, subject, user_id)
+         SELECT $1, $2, u.id FROM app_session s JOIN app_user u ON u.id = s.user_id
+         WHERE s.token_hash = $3 AND s.expires_at > now() AND NOT u.disabled
+         ON CONFLICT (provider, subject) DO UPDATE SET user_id = EXCLUDED.user_id
+         WHERE oauth_identity.user_id = EXCLUDED.user_id RETURNING user_id`,
+        [provider, payload.sub, attempt.link_session_hash],
+      );
+      return redirect(null, Boolean(linked));
+    }
 
     const { rows: [existing] } = await db.query(
       `SELECT u.id, u.email, u.disabled FROM oauth_identity i JOIN app_user u ON u.id=i.user_id

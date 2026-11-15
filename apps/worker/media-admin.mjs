@@ -1,14 +1,17 @@
 import { createServer } from 'node:http';
 import { createLocalMedia } from './local-media.mjs';
+import { createFixtureCdnProxy } from './fixture-cdn.mjs';
 import { resolveFixtureGrant } from './fixture-grants.mjs';
 import { serveFixtureWatch } from './fixture-watch-routes.mjs';
 import { catalogResponse } from './catalog-api.mjs';
 import { fixtureDemoResponse } from './fixture-demo.mjs';
+import { adminAccountsResponse } from './admin-accounts.mjs';
 import { accountResponse, sessionUser } from './accounts.mjs';
 import { oauthSettingsResponse } from './oauth-settings.mjs';
 import { oauthResponse } from './oauth-flow.mjs';
 import { viewerLibraryResponse } from './viewer-library.mjs';
 import { recoveryResponse } from './recovery.mjs';
+import { createMailOutbox } from './account-mail-outbox.mjs';
 import { resetMailer } from './reset-mail.mjs';
 import { verificationResponse } from './email-verification.mjs';
 import pg from 'pg';
@@ -19,9 +22,14 @@ if (!DATABASE_URL || !MEDIA_ADMIN_TOKEN) throw new Error('Set DATABASE_URL and M
 const local = process.env.MEDIA_SIGNING_KEY
   ? createLocalMedia(process.env.FIXTURE_MEDIA_DIR ?? './var/media', process.env.MEDIA_SIGNING_KEY)
   : null;
+const cdnBase = process.env.FIXTURE_CDN_BASE_URL;
+if (cdnBase && !local) throw new Error('Set MEDIA_SIGNING_KEY to use FIXTURE_CDN_BASE_URL');
+const cdnProxy = cdnBase ? createFixtureCdnProxy(cdnBase) : null;
 const db = new pg.Pool({ connectionString: DATABASE_URL });
 
 const deliverReset = resetMailer(process.env);
+const accountMailOutbox = process.env.MAIL_OUTBOX_KEY
+  ? createMailOutbox(process.env.MAIL_OUTBOX_KEY) : null;
 const attempts = new Map();
 const port = Number(MEDIA_ADMIN_PORT);
 const server = createServer(async (incoming, outgoing) => {
@@ -37,46 +45,15 @@ const server = createServer(async (incoming, outgoing) => {
       if (oauth.headers.has('set-cookie')) headers['set-cookie'] = oauth.headers.getSetCookie();
       return outgoing.writeHead(oauth.status, headers).end(await oauth.text());
     }
-    if (url.pathname === '/admin/users') {
-      const probe = new Request('http://localhost/admin/media-settings', {
-        method: 'OPTIONS', headers: incoming.headers,
-      });
-      if ((await handleMediaSettings(probe, db, MEDIA_ADMIN_TOKEN)).status === 401) {
-        return outgoing.writeHead(401).end();
-      }
-      let rows;
-      if (incoming.method === 'GET') {
-        const cursor = url.searchParams.get('after');
-        if (cursor && !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(cursor)) {
-          return outgoing.writeHead(400).end();
-        }
-        ({ rows } = await db.query(
-          'SELECT id, email, disabled, created_at FROM app_user WHERE ($1::uuid IS NULL OR id > $1) ORDER BY id LIMIT 101',
-          [cursor],
-        ));
-      } else if (incoming.method === 'PATCH') {
-        const id = url.searchParams.get('id');
-        const disabled = url.searchParams.get('disabled');
-        if (!id || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(id) ||
-            !['true', 'false'].includes(disabled)) return outgoing.writeHead(400).end();
-        ({ rows } = await db.query(
-          `WITH updated AS (
-             UPDATE app_user SET disabled = $2 WHERE id = $1 RETURNING id, email, disabled
-           ), revoked AS (
-             DELETE FROM app_session WHERE user_id IN (SELECT id FROM updated)
-           ) SELECT * FROM updated`, [id, disabled === 'true'],
-        ));
-        if (!rows.length) return outgoing.writeHead(404).end();
-      } else {
-        return outgoing.writeHead(405, { Allow: 'GET, PATCH' }).end();
-      }
-      return outgoing.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
-        .end(JSON.stringify({ users: rows.slice(0, 100), nextCursor: rows.length > 100 ? rows[99].id : null }));
+    if (['/admin/users', '/admin/user-audit'].includes(url.pathname)) {
+      const request = new Request(url, { method: incoming.method, headers: incoming.headers });
+      const response = await adminAccountsResponse(db, request, MEDIA_ADMIN_TOKEN, process.env.MEDIA_ADMIN_ACTOR);
+      return outgoing.writeHead(response.status, Object.fromEntries(response.headers)).end(await response.text());
     }
-    if (['/v1/account/session', '/v1/account/login', '/v1/account/register', '/v1/account/logout', '/v1/account/forgot-password', '/v1/account/reset-password', '/v1/account/request-verification', '/v1/account/verify-email'].includes(url.pathname)) {
+    if (['/v1/account/session', '/v1/account/login', '/v1/account/register', '/v1/account/logout', '/v1/account/forgot-password', '/v1/account/reset-password', '/v1/account/request-verification', '/v1/account/verify-email', '/v1/account/change-password', '/v1/account/revoke-other-sessions'].includes(url.pathname)) {
       const site = new URL(process.env.AUTH_PUBLIC_ORIGIN ?? 'http://127.0.0.1:' + server.address().port);
       if (incoming.headers.host !== site.host) return outgoing.writeHead(403).end();
-      if (incoming.method === 'POST' && /\/(login|register|forgot-password|reset-password|request-verification|verify-email)$/.test(url.pathname)) {
+      if (incoming.method === 'POST' && /\/(login|register|forgot-password|reset-password|request-verification|verify-email|change-password)$/.test(url.pathname)) {
         const minute = Math.floor(Date.now() / 60000);
         const address = incoming.socket.remoteAddress;
         for (const [key, value] of attempts) if (value.minute !== minute) attempts.delete(key);
@@ -97,9 +74,9 @@ const server = createServer(async (incoming, outgoing) => {
         ...(length && incoming.method === 'POST' ? { body: Buffer.concat(chunks) } : {}),
       });
       const account = /\/(request-verification|verify-email)$/.test(url.pathname)
-        ? await verificationResponse(db, request, deliverReset)
-        : url.pathname.endsWith('-password')
-        ? await recoveryResponse(db, request, deliverReset)
+        ? await verificationResponse(db, request, deliverReset, accountMailOutbox)
+        : /\/(forgot-password|reset-password)$/.test(url.pathname)
+        ? await recoveryResponse(db, request, deliverReset, accountMailOutbox)
         : await accountResponse(db, request, site.protocol === 'https:');
       outgoing.writeHead(account.status, Object.fromEntries(account.headers));
       return outgoing.end(Buffer.from(await account.arrayBuffer()));
@@ -126,7 +103,7 @@ const server = createServer(async (incoming, outgoing) => {
     }
     if (await serveFixtureWatch(incoming, outgoing, url.pathname, Boolean(local))) return;
     if (local && url.pathname.startsWith('/fixture-media/')) {
-      await local.serve(incoming, outgoing, url.pathname);
+      await (cdnProxy ?? local.serve)(incoming, outgoing, url.pathname);
       return;
     }
     if (local && url.pathname === '/admin/fixture-grant') {
