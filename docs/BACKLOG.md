@@ -41,6 +41,8 @@ Use this queue for current task selection. The phase table above defines deliver
 
 Draft pull requests, integrated test evidence, and the next action are in [STATE.md](STATE.md).
 
+AUD-07 is continuing in the design handoff draft on `codex/aud-07-design-handoff`.
+
 ## Task card
 
 ID and goal · dependencies · owner/role and PR · scope and affected contracts · acceptance checks · evidence · blocker and next action.
