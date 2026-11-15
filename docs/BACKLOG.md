@@ -30,18 +30,18 @@ Use this queue for current task selection. The phase table above defines deliver
 
 | ID | Status | Dependency | Acceptance evidence |
 | --- | --- | --- | --- |
-| AUD-01 | In review | Local account APIs | Extend Chromium coverage to request and consume reset and verification links via a test mail transport. Verify revoked session and visible verified status. |
-| AUD-02 | In review | Local media pipeline | Specify and test production playback/download entitlement, disabled viewer behavior, territory/window checks, and existing grant expiry/revocation. |
-| AUD-03 | In review | Fixture schema | Introduce versioned migrations and test clean DB plus upgrade of existing catalog/account/asset records. |
-| AUD-04 | In review | OAuth callback code, AUD-03 migrations | Test successful and rejected token exchange with fixtures, then implement explicit authenticated linking. Live provider test needs HTTPS and real credentials. |
-| AUD-05 | In review | Registry and coverage tool | Separate discovery roots and actual provider inventories, track per-locale expected IDs and evidence, and compare catalog and media availability separately. Live completeness needs upstream exports. |
-| AUD-06 | In review | Local storage and CDN settings | Add CDN delivery integration and test against a private fixture origin. Live verification needs configured CDN and bucket. |
+| AUD-01 | Done | Local account APIs | Extend Chromium coverage to request and consume reset and verification links via a test mail transport. Verify revoked session and visible verified status. |
+| AUD-02 | Done | Local media pipeline | Specify and test production playback/download entitlement, disabled viewer behavior, territory/window checks, and existing grant expiry/revocation. |
+| AUD-03 | Done | Fixture schema | Introduce versioned migrations and test clean DB plus upgrade of existing catalog/account/asset records. |
+| AUD-04 | Done | OAuth callback code, AUD-03 migrations | Test successful and rejected token exchange with fixtures, then implement explicit authenticated linking. Live provider test needs HTTPS and real credentials. |
+| AUD-05 | Done | Registry and coverage tool | Separate discovery roots and actual provider inventories, track per-locale expected IDs and evidence, and compare catalog and media availability separately. Live completeness needs upstream exports. |
+| AUD-06 | Done | Local storage and CDN settings | Add CDN delivery integration and test against a private fixture origin. Live verification needs configured CDN and bucket. |
 | AUD-07 | In progress | Target architecture | Finalize design spec and move fixture UI/API toward Next.js and NestJS with contract parity. Start Expo after shared contracts are stable. |
-| AUD-08 | In review | Account recovery APIs, migration runner | Add durable mail delivery, signed-in profile/password/session controls, admin UI and audit events. Live delivery needs configured sender. |
+| AUD-08 | Done | Account recovery APIs, migration runner | Add durable mail delivery, signed-in profile/password/session controls, admin UI and audit events. Live delivery needs configured sender. |
 
 Draft pull requests, integrated test evidence, and the next action are in [STATE.md](STATE.md).
 
-AUD-07 is continuing in the design handoff draft on `codex/aud-07-design-handoff`.
+AUD-07 continues in [PR #11](https://github.com/Vertex-Systems-Network/series-viral-box/pull/11).
 
 ## Task card
 
