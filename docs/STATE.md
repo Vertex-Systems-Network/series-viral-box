@@ -12,4 +12,6 @@
 
 **First task:** AUD-01. Add repeatable account browser coverage for password reset and verification using injected mail, without waiting for live credentials. Start from scripts/fixture-watch-smoke.mjs and the recovery/verification worker tests. Then take another ready item in backlog order. No production release while P0 findings remain open.
 
+**AUD-03:** [Draft PR #4](https://github.com/Vertex-Systems-Network/series-viral-box/pull/4) versions the catalog schema and applies it before sync. The migration suite covers clean install, replay, divergence detection, legacy data adoption, and atomic rollback. Keep `db/catalog.sql` as the legacy fixture snapshot. Next is AUD-04, fixture OAuth token exchange and explicit account linking.
+
 **External dependencies:** Complete licensed provider inventories, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Work on fixtures, contract tests and design can proceed independently.
