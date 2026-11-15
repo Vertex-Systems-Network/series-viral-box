@@ -26,3 +26,5 @@
 **Next executable task:** Validate the native fixture client on actual target devices after creating the Expo integration and configuring a device-accessible development transport. The loopback fixture session endpoint is intentionally scoped to direct local testing. Production federated sign-in needs an HTTPS origin and a browser-based authorization code flow with PKCE.
 
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
+
+**Active claim:** AUD-07 native media fixture verification.
