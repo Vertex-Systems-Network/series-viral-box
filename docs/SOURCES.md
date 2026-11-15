@@ -146,3 +146,9 @@ Run `node scripts/discover-reelfren.mjs discovery.json`. The command reads publi
 Run `node scripts/discover-reelfren.mjs discovery.json aniboy vigloo dramanova iqiyi` to extend a fresh Explore manifest with selected providers, or pass `--all` to attempt each registered provider's initial browse page sequentially. The manifest preserves global results and records the status and added titles per attempted provider. Failed requests are reported in the saved manifest and set a nonzero exit status. An empty public browse page leaves inventory unknown.
 
 Run `node scripts/collect-reelfren.mjs snapshot.json sixthshort --manifest discovery.json 1` to collect the first supported numeric-ID title for a provider. The limit is explicit and accepted from 1 to 100. The CLI also continues to accept explicit title URLs. Results cover the initial public pages and selected titles. Treat them as partial while pagination, other feeds, or regions are unverified.
+
+## Live pilot qualification
+
+Use `node scripts/pilot-readiness.mjs` to report the selected provider and its inventory, rate-limit, media, and distribution-rights evidence. For release checks, add `--require-ready` to require four separately verified gates and a qualified registry entry.
+
+The development source is `fixture`. The first tracked candidate is `reelfren/anamana` because the repository already has a collector and documented catalog sample. The sample is partial. The candidate still requires an authoritative inventory, documented rate limits, approved reusable media, and explicit distribution rights. Add dated review references once those are verified. Keep credentials, signed URLs and confidential agreements out of this public repository.

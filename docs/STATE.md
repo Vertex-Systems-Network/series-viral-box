@@ -35,3 +35,5 @@
 
 
 **P0-01 workspace checkpoint:** [PR #19](https://github.com/Vertex-Systems-Network/series-viral-box/pull/19) adds the root pnpm workspace and frozen lock. It preserves the standalone Expo harness lock. Once merged with passing clean-install CI, return to the next ready non-design backlog task and retain device acceptance as a separate gate.
+
+**P0-02 pilot qualification:** [PR #20](https://github.com/Vertex-Systems-Network/series-viral-box/pull/20) records the fixture and `reelfren/anamana` pilot candidate and checks independent inventory, limits, media and rights evidence. The current candidate is blocked on an authoritative inventory, provider limits, approved media and distribution rights. The report command is `node scripts/pilot-readiness.mjs`. Use `--require-ready` at the live pilot gate.

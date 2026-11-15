@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "fixture": "fixture",
+  "live": {
+    "source": "reelfren/anamana",
+    "evidence": {
+      "inventory": {
+        "status": "partial",
+        "reference": "docs/SOURCES.md#reelfren-anamana-public-catalog-collector"
+      },
+      "limits": { "status": "pending" },
+      "media": { "status": "pending" },
+      "rights": { "status": "pending" }
+    }
+  }
+}
