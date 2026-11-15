@@ -68,3 +68,9 @@ This standalone harness uses its own dependency lock. From `tools/expo-fixture` 
 3. Sign in, load the HLS player, seek or play, save the position, then reload and verify the seek position. Verify the MP4 download and confirm it completes. The harness removes the temporary cache file. Sign out and check that the player closes. Also retry with media unavailable and after suspending the fixture account.
 
 Device success requires a native build and emulator or hardware. The JavaScript export is a separate verification step. The fixture download does not enable production offline retention.
+
+## Local dependency stack
+
+Copy `.env.example` to `.env` and run `docker compose up -d --wait` from the repo root. Compose starts PostgreSQL, Redis and an S3-compatible local object store with loopback-only ports and persistent volumes. Load the example values into your shell with `set -a; source .env; set +a` before running `npm ci` and `npm run sync:fixture`. Keep connection URLs aligned if you change ports or credentials.
+
+Local disk stays the default media store. For the S3 fixture path, use the AWS CLI with `FIXTURE_S3_ENDPOINT` to create the private bucket named by `FIXTURE_MEDIA_BUCKET`, then follow [MEDIA.md](docs/MEDIA.md). Unset `FIXTURE_MEDIA_BUCKET` for local disk publication. Redis is available for queue development. The current sync worker still uses PostgreSQL for checkpoints. Run `docker compose down` to stop the stack and retain fixture data.

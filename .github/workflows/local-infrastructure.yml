@@ -1,0 +1,51 @@
+name: Local infrastructure
+on:
+  pull_request:
+    paths:
+      - 'compose.yaml'
+      - '.env.example'
+      - '.github/workflows/local-infrastructure.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Start local services
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+          docker compose up -d --wait --wait-timeout 100
+      - name: Verify catalog replay, Redis, and private object storage
+        shell: bash
+        run: |
+          set -a
+          source .env
+          set +a
+          npm run sync:fixture
+          npm run sync:fixture
+          test "$(docker compose exec -T postgres psql -U fixture -d catalog -Atc 'SELECT count(*) FROM catalog_episode')" = 1
+          test "$(docker compose exec -T redis redis-cli SET fixture:probe ok)" = OK
+          test "$(docker compose exec -T redis redis-cli GET fixture:probe)" = ok
+          export AWS_REQUEST_CHECKSUM_CALCULATION=when_required AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
+          for attempt in {1..20}; do
+            if aws --endpoint-url "$FIXTURE_S3_ENDPOINT" --cli-connect-timeout 2 --cli-read-timeout 2 s3api list-buckets >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          aws --endpoint-url "$FIXTURE_S3_ENDPOINT" s3api create-bucket --bucket "$FIXTURE_MEDIA_BUCKET"
+          printf 'fixture\n' > "$RUNNER_TEMP/svb-input"
+          aws --endpoint-url "$FIXTURE_S3_ENDPOINT" s3 cp "$RUNNER_TEMP/svb-input" "s3://$FIXTURE_MEDIA_BUCKET/fixture.txt"
+          aws --endpoint-url "$FIXTURE_S3_ENDPOINT" s3 cp "s3://$FIXTURE_MEDIA_BUCKET/fixture.txt" "$RUNNER_TEMP/svb-output"
+          cmp "$RUNNER_TEMP/svb-input" "$RUNNER_TEMP/svb-output"
+          code="$(curl --silent --output /dev/null --write-out '%{http_code}' "$FIXTURE_S3_ENDPOINT/$FIXTURE_MEDIA_BUCKET/fixture.txt")"
+          [[ "$code" == 401 || "$code" == 403 ]]
+      - if: always()
+        run: docker compose down --volumes
