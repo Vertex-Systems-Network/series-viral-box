@@ -20,3 +20,5 @@
 **Next executable task:** Add the same-origin routing needed for Next.js viewer mutations and media playback, and verify host, cookie, range and origin behavior end to end. Design work is tracked separately from the implementation loop.
 
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
+
+**Active claim:** AUD-07 same-origin Next.js viewer routing on `codex/aud-07-same-origin`.
