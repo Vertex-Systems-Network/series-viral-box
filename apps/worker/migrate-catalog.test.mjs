@@ -9,9 +9,9 @@ const versionQuery = 'SELECT version, name, checksum, applied_at FROM catalog_sc
 test('installs the catalog schema once and rejects divergent history', async () => {
   const db = new PGlite();
   try {
-    assert.deepEqual(await migrateCatalog(db), [1, 2]);
+    assert.deepEqual(await migrateCatalog(db), [1, 2, 3]);
     const { rows } = await db.query(versionQuery);
-    assert.deepEqual(rows.map(row => row.version), [1, 2]);
+    assert.deepEqual(rows.map(row => row.version), [1, 2, 3]);
     assert.ok(rows.every(row => /^[a-f0-9]{64}$/.test(row.checksum)));
     assert.deepEqual(await migrateCatalog(db), []);
     assert.deepEqual((await db.query(versionQuery)).rows, rows);
@@ -42,7 +42,7 @@ test('adopts existing catalog, account and published asset rows', async () => {
     ];
     const before = [];
     for (const query of queries) before.push((await db.query(query)).rows);
-    assert.deepEqual(await migrateCatalog(db), [1, 2]);
+    assert.deepEqual(await migrateCatalog(db), [1, 2, 3]);
     for (const [index, query] of queries.entries()) {
       assert.deepEqual((await db.query(query)).rows, before[index]);
     }
@@ -64,7 +64,7 @@ test('rolls back schema and ledger together on migration failure', async () => {
     await assert.rejects(migrateCatalog(client), /Injected migration failure/);
     const { rows } = await db.query("SELECT to_regclass('catalog_title') AS catalog, to_regclass('catalog_schema_migration') AS ledger");
     assert.deepEqual(rows, [{ catalog: null, ledger: null }]);
-    assert.deepEqual(await migrateCatalog(db), [1, 2]);
+    assert.deepEqual(await migrateCatalog(db), [1, 2, 3]);
   } finally {
     await db.close();
   }

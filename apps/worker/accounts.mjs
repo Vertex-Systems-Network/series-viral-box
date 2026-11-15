@@ -16,12 +16,17 @@ function tokenFrom(cookie) {
   return /(?:^|;\s*)svb_session=([a-f0-9]{64})(?:;|$)/.exec(cookie ?? '')?.[1];
 }
 
-export async function sessionUser(db, cookie) {
+export function sessionHash(cookie) {
   const token = tokenFrom(cookie);
-  if (!token) return null;
+  return token ? hashToken(token) : null;
+}
+
+export async function sessionUser(db, cookie) {
+  const session = sessionHash(cookie);
+  if (!session) return null;
   const { rows } = await db.query(
     `SELECT u.id, u.email, u.email_verified_at FROM app_session s JOIN app_user u ON u.id = s.user_id
-     WHERE s.token_hash = $1 AND s.expires_at > now() AND NOT u.disabled`, [hashToken(token)],
+     WHERE s.token_hash = $1 AND s.expires_at > now() AND NOT u.disabled`, [session],
   );
   return rows[0] ?? null;
 }

@@ -192,6 +192,7 @@ function showAccount(user) {
   refreshLibrary();
   byId('account').hidden = Boolean(user);
   byId('logout').hidden = !user;
+  byId('social-linking').hidden = !user;
 }
 byId('account').addEventListener('click', () => dialog.showModal());
 byId('close-login').addEventListener('click', () => dialog.close());
@@ -235,13 +236,23 @@ byId('logout').addEventListener('click', async () => {
 fetch('/v1/account/session').then(response => response.json()).then(({ user }) => showAccount(user)).catch(() => {});
 
 const oauthResult = new URLSearchParams(location.search).get('oauth');
-if (oauthResult === 'failed') status.textContent = 'Social sign-in failed. Try again or log in with email.';
+const socialStatus = byId('social-status');
+if (oauthResult === 'failed') socialStatus.textContent = 'Social sign-in failed. Try again or log in with email.';
+if (oauthResult === 'linked') socialStatus.textContent = 'Social account linked.';
+if (oauthResult === 'link-failed') socialStatus.textContent = 'Could not link this social account.';
 fetch('/v1/oauth/providers').then(response => response.json()).then(({ providers }) => {
   for (const provider of providers) {
     const link = document.createElement('a');
     link.href = '/v1/oauth/' + provider + '/start';
     link.textContent = provider === 'google' ? 'Continue with Google' : 'Continue with Apple';
     byId('social-login').append(link, document.createElement('br'));
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = '/v1/oauth/' + provider + '/link';
+    const button = document.createElement('button');
+    button.textContent = provider === 'google' ? 'Link Google account' : 'Link Apple account';
+    form.append(button);
+    byId('social-linking').append(form);
   }
 }).catch(() => {});
 

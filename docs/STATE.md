@@ -14,4 +14,6 @@
 
 **AUD-03:** [Draft PR #4](https://github.com/Vertex-Systems-Network/series-viral-box/pull/4) versions the catalog schema and applies it before sync. The migration suite covers clean install, replay, divergence detection, legacy data adoption, and atomic rollback. Keep `db/catalog.sql` as the legacy fixture snapshot. Next is AUD-04, fixture OAuth token exchange and explicit account linking.
 
+**AUD-04:** [Draft PR #5](https://github.com/Vertex-Systems-Network/series-viral-box/pull/5) adds explicit signed-in OAuth linking and fixture exchanges for Google and Apple. All 14 worker tests passed. Live callback verification requires real provider credentials and an HTTPS origin. PR #5 builds on the migration runner in PR #4. Next is AUD-05, separate source discovery, catalog coverage and media readiness evidence.
+
 **External dependencies:** Complete licensed provider inventories, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Work on fixtures, contract tests and design can proceed independently.
