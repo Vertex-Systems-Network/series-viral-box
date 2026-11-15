@@ -2,7 +2,7 @@
 
 ## Current baseline
 
-The draft implementation uses npm workspaces and a lean Node.js loopback service with PostgreSQL. Next.js, Expo, NestJS, Prisma and the queue-backed worker below are target components. Local disk is the default media store. Object storage and CDN delivery are optional configuration. Web playback uses a blob URL backed by signed same-origin HLS. Treat public source discovery and complete production media rights as separate dependencies. See the [audit](AUDIT.md), [current state](STATE.md) and post-audit backlog for verification and rollout order.
+The repository now runs a pnpm workspace with Next.js catalog pages, NestJS fixture routes, PostgreSQL migrations and a standalone Expo development harness. Local disk is the default media store. PostgreSQL, Redis and private S3-compatible local storage have verified CI coverage. Prisma, queue-backed ingest, production entitlements, device acceptance and live provider integration remain target work. See [AUDIT.md](AUDIT.md) for acceptance gaps and [STATE.md](STATE.md) for the active task.
 
 ## Outcome
 
@@ -10,7 +10,7 @@ One branded web and native mobile catalog with All Series and provider views, lo
 
 ## Architecture
 
-| Component | Baseline | Responsibility |
+| Component | Target | Responsibility |
 | --- | --- | --- |
 | Web and admin | Next.js App Router | Searchable public catalog, watch pages, operational dashboard |
 | Mobile | Expo / React Native | iOS and Android catalog, player and account UI |
