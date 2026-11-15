@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import { validate } from '../../scripts/source-registry.mjs';
+import { isProviderSource, validate } from '../../scripts/source-registry.mjs';
 
 export async function loadInventoryAdapter(path) {
   const bytes = await readFile(path);
@@ -9,7 +9,7 @@ export async function loadInventoryAdapter(path) {
     new URL('../../data/source-registry.json', import.meta.url), 'utf8',
   )));
   if (inventory?.version !== 1 || !Array.isArray(inventory.titles) ||
-      !registry.records.some(row => row.source + '/' + row.key === inventory.source)) {
+      !registry.records.some(row => isProviderSource(row) && row.source + '/' + row.key === inventory.source)) {
     throw new Error('Expected a version 1 inventory for a registered source');
   }
 

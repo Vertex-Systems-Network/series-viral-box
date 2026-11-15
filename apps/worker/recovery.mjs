@@ -3,9 +3,9 @@ import { hashPassword, hashToken, validPassword } from './accounts.mjs';
 
 const reply = (data, status) => Response.json(data, { status, headers: { 'Cache-Control': 'no-store' } });
 
-export async function recoveryResponse(db, request, deliver) {
+export async function recoveryResponse(db, request, deliver, outbox) {
   const url = new URL(request.url);
-  if (!deliver) return reply({ error: 'unavailable' }, 503);
+  if (!deliver && !outbox) return reply({ error: 'unavailable' }, 503);
   if (request.method !== 'POST') return reply({ error: 'method_not_allowed' }, 405);
   if (request.headers.get('origin') !== url.origin) return reply({ error: 'invalid_origin' }, 403);
   const input = await request.json().catch(() => null);
@@ -16,16 +16,19 @@ export async function recoveryResponse(db, request, deliver) {
     }
     const token = randomBytes(32).toString('hex');
     const tokenHash = hashToken(token);
-    const { rows: [account] } = await db.query(
-      `INSERT INTO password_reset (user_id, token_hash, expires_at)
+    const link = new URL('/catalog', url.origin);
+    link.hash = new URLSearchParams({ reset: token }).toString();
+    const upsert = `INSERT INTO password_reset (user_id, token_hash, expires_at)
        SELECT id, $2, now() + interval '20 minutes'
        FROM app_user WHERE email = $1 AND NOT disabled AND password_hash IS NOT NULL
        ON CONFLICT (user_id) DO UPDATE SET token_hash = EXCLUDED.token_hash, expires_at = EXCLUDED.expires_at
-       RETURNING user_id`, [email, tokenHash],
-    );
+       RETURNING user_id, token_hash, expires_at`;
+    if (outbox) {
+      await outbox.enqueue(db, 'reset', upsert, [email, tokenHash], email, link.href);
+      return reply({ accepted: true }, 202);
+    }
+    const { rows: [account] } = await db.query(upsert, [email, tokenHash]);
     if (account) {
-      const link = new URL('/catalog', url.origin);
-      link.hash = new URLSearchParams({ reset: token }).toString();
       // Respond before delivery so mail transport latency does not reveal account presence.
       void Promise.resolve().then(() => deliver(email, link.href)).catch(async () => {
         await db.query('DELETE FROM password_reset WHERE token_hash = $1', [tokenHash]);

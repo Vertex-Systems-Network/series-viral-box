@@ -8,6 +8,8 @@ import { promisify } from 'node:util';
 import { chromium } from 'playwright';
 import { PGlite } from '@electric-sql/pglite';
 import { accountResponse, sessionUser } from '../apps/worker/accounts.mjs';
+import { recoveryResponse } from '../apps/worker/recovery.mjs';
+import { verificationResponse } from '../apps/worker/email-verification.mjs';
 import { catalogResponse } from '../apps/worker/catalog-api.mjs';
 import { fixtureDemoResponse } from '../apps/worker/fixture-demo.mjs';
 import { viewerLibraryResponse } from '../apps/worker/viewer-library.mjs';
@@ -20,6 +22,10 @@ const run = promisify(execFile);
 const root = await mkdtemp(join(tmpdir(), 'svb-watch-'));
 const media = createLocalMedia(root, 'fixture-key-'.repeat(4));
 const db = new PGlite();
+const inbox = new Map();
+const deliverMail = (email, link, purpose = 'reset') => {
+  inbox.set(purpose, { email, link });
+};
 const server = createServer(async (request, response) => {
   try {
     const origin = 'http://127.0.0.1:' + server.address().port;
@@ -29,10 +35,17 @@ const server = createServer(async (request, response) => {
     if (pathname.startsWith('/v1/account/')) {
       const chunks = [];
       for await (const chunk of request) chunks.push(chunk);
-      result = await accountResponse(db, new Request(url, {
+      const accountRequest = new Request(url, {
         method: request.method, headers: request.headers,
         ...(chunks.length ? { body: Buffer.concat(chunks) } : {}),
-      }), false);
+      });
+      if (pathname.endsWith('-password')) {
+        result = await recoveryResponse(db, accountRequest, deliverMail);
+      } else if (pathname.endsWith('/request-verification') || pathname.endsWith('/verify-email')) {
+        result = await verificationResponse(db, accountRequest, deliverMail);
+      } else {
+        result = await accountResponse(db, accountRequest, false);
+      }
     } else if (pathname === '/v1/fixture-playback') {
       result = await sessionUser(db, request.headers.cookie)
         ? await fixtureDemoResponse(db, media, true, url, request.method)
@@ -76,6 +89,8 @@ try {
   } else {
     browser = await chromium.launch({ executablePath: process.env.CHROMIUM_BIN });
     const page = await browser.newPage();
+    const email = 'viewer@example.test';
+    const password = 'fixture-password';
     const requests = [];
     page.on('request', request => requests.push(request.url()));
     await page.goto(origin + '/catalog');
@@ -84,8 +99,8 @@ try {
     await selectTitle();
     await watch();
     const dialog = page.getByRole('dialog');
-    await dialog.getByLabel('Email').fill('viewer@example.test');
-    await dialog.getByLabel('Password').fill('fixture-password');
+    await dialog.getByLabel('Email').fill(email);
+    await dialog.getByLabel('Password').fill(password);
     await dialog.getByRole('button', { name: 'Register' }).click();
     await page.waitForURL('**/fixture-watch#*');
     await page.waitForFunction(() => document.querySelector('video').readyState >= 2);
@@ -115,6 +130,51 @@ try {
     assert.deepEqual(external.map(url => url.protocol + '//' + url.host), [],
       'Playback should use the fixture origin for network and blob URLs');
     console.log('Chromium verified registration, My List, saved-position resume and same-origin blob playback');
+
+    const mailLink = purpose => {
+      const message = inbox.get(purpose);
+      assert.equal(message?.email, email, 'Mail recipient should match the fixture viewer');
+      assert.equal(new URL(message.link).origin, origin, 'Mail link should target the fixture origin');
+      return message.link;
+    };
+
+    // Retain the original viewer session while another browser context resets the password.
+    const recoveryPage = await browser.newPage();
+    await recoveryPage.goto(origin + '/catalog');
+    await recoveryPage.getByRole('button', { name: 'Log in', exact: true }).click();
+    await recoveryPage.getByRole('button', { name: 'Forgot password' }).click();
+    const recovery = recoveryPage.locator('#recovery');
+    await recovery.getByLabel('Email').fill(email);
+    await recovery.getByRole('button', { name: 'Continue' }).click();
+    await recovery.getByText('If the account is eligible, a reset link will arrive by email.').waitFor();
+
+    // Load links as external mail navigation so the catalog processes the new fragment.
+    await recoveryPage.goto('about:blank');
+    await recoveryPage.goto(mailLink('reset'));
+    const newPassword = 'fixture-password-replaced';
+    await recovery.getByLabel('New password').fill(newPassword);
+    await recovery.getByRole('button', { name: 'Continue' }).click();
+    const login = recoveryPage.locator('#login');
+    await recoveryPage.getByText('Password updated. Log in with your new password.').waitFor();
+
+    await page.goto(origin + '/catalog');
+    await page.getByRole('button', { name: 'Log in', exact: true }).waitFor();
+    const revokedSession = await page.request.get(origin + '/v1/account/session');
+    assert.equal((await revokedSession.json()).user, null);
+
+    await login.getByLabel('Email').fill(email);
+    await login.getByLabel('Password').fill(newPassword);
+    await login.getByRole('button', { name: 'Log in', exact: true }).click();
+    await recoveryPage.getByRole('button', { name: 'Verify email', exact: true }).click();
+    await recoveryPage.getByText('Check your inbox for the verification link.').waitFor();
+    await recoveryPage.goto('about:blank');
+    await recoveryPage.goto(mailLink('verify'));
+    await recoveryPage.getByText('Email verified.', { exact: true }).waitFor();
+    await recoveryPage.getByRole('button', { name: 'Log out', exact: true }).waitFor();
+    await recoveryPage.getByRole('button', { name: 'Verify email', exact: true }).waitFor({ state: 'hidden' });
+    const verifiedSession = await recoveryPage.request.get(origin + '/v1/account/session');
+    assert.ok((await verifiedSession.json()).user?.email_verified_at);
+    console.log('Chromium verified password recovery, session revocation, login and email verification');
   }
 } finally {
   await browser?.close();

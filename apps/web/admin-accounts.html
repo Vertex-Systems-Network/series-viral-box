@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account support | Series Viral Box</title><link rel="stylesheet" href="/catalog/style.css">
+</head>
+<body><main>
+<h1>Account support</h1>
+<form id="search" method="post">
+<label>Admin token <input id="admin-token" type="password" autocomplete="off" required></label>
+<label>Viewer email <input name="email" type="email" placeholder="All viewers"></label>
+<button>Find viewers</button>
+</form>
+<p id="status" role="status"></p>
+<ul id="viewers"></ul>
+<button id="next" hidden>Next page</button>
+<section id="audit" hidden>
+<h2 id="audit-heading" tabindex="-1">Support history</h2>
+<ul id="events"></ul>
+</section>
+</main><script type="module" src="/admin/accounts.mjs"></script></body>
+</html>

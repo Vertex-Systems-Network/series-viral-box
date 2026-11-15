@@ -3,6 +3,8 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const routes = new Map([
+  ['/admin/accounts', [new URL('../web/admin-accounts.html', import.meta.url), 'text/html']],
+  ['/admin/accounts.mjs', [new URL('../web/admin-accounts.mjs', import.meta.url), 'text/javascript']],
   ['/catalog', [new URL('../web/catalog.html', import.meta.url), 'text/html']],
   ['/catalog/style.css', [new URL('../web/catalog.css', import.meta.url), 'text/css']],
   ['/catalog/page.mjs', [new URL('../web/catalog.mjs', import.meta.url), 'text/javascript']],
