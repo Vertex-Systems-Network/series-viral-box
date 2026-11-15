@@ -13,7 +13,7 @@ export class CatalogRequestError extends Error {
  */
 
 /** Use a transport that owns session handling for authenticated fixture calls. */
-export function createCatalogClient(base, transport = fetch) {
+export function createCatalogClient(base, transport = fetch, { nativeFixture = false } = {}) {
   const origin = new URL(base);
   if (!['http:', 'https:'].includes(origin.protocol) || origin.href !== origin.origin + '/') {
     throw new TypeError('Expected a catalog API origin');
@@ -31,6 +31,7 @@ export function createCatalogClient(base, transport = fetch) {
     return body;
   }
 
+  const viewerBase = nativeFixture ? '/v1/native' : '/v1';
   const episodeQuery = ({ source, id, locale, episodeId }) => ({ source, titleId: id, locale, episodeId });
 
   return {
@@ -40,10 +41,10 @@ export function createCatalogClient(base, transport = fetch) {
     /** @param {TitleIdentity} identity */
     title: ({ source, id, locale }, signal) => getJson('/v1/title', { source, id, locale }, 'GET', signal),
     /** @param {EpisodeIdentity} identity */
-    progress: (identity, signal) => getJson('/v1/me/progress', episodeQuery(identity), 'GET', signal),
+    progress: (identity, signal) => getJson(viewerBase + '/me/progress', episodeQuery(identity), 'GET', signal),
     /** @param {EpisodeIdentity} identity */
     setProgress: (identity, position, signal) =>
-      getJson('/v1/me/progress', { ...episodeQuery(identity), position }, 'PUT', signal),
+      getJson(viewerBase + '/me/progress', { ...episodeQuery(identity), position }, 'PUT', signal),
     /**
      * @param {EpisodeIdentity} identity
      * @param {'playback' | 'download'} kind
@@ -52,7 +53,7 @@ export function createCatalogClient(base, transport = fetch) {
       if (identity.source !== 'fixture' || !['playback', 'download'].includes(kind)) {
         throw new TypeError('Expected a fixture episode and a valid grant kind');
       }
-      const data = await getJson('/v1/fixture-playback', { ...episodeQuery(identity), kind }, 'POST', signal);
+      const data = await getJson(viewerBase + '/fixture-playback', { ...episodeQuery(identity), kind }, 'POST', signal);
       let url;
       try {
         if (typeof data.url !== 'string') throw new TypeError();

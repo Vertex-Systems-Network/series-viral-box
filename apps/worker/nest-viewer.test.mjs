@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { PGlite } from '@electric-sql/pglite';
+import { hashToken } from './accounts.mjs';
+import { createNativeFixtureClient } from '../mobile/native-fixture-client.mjs';
 import { CatalogRequestError, createCatalogClient } from '../mobile/catalog-client.mjs';
 import { createCatalogApp } from '../api/catalog-app.mjs';
 import { migrateCatalog } from './migrate-catalog.mjs';
@@ -114,4 +116,53 @@ test('native fixture client preserves cursors and rejects foreign or mismatched 
   await assert.rejects(client.fixtureGrant(identity, 'playback'),
     error => error instanceof CatalogRequestError && error.code === 'invalid_media_grant');
   await assert.rejects(client.fixtureGrant({ ...identity, source: 'other' }, 'playback'), TypeError);
+});
+
+test('native fixture sign-in is opt-in, separated from cookie sessions, and revoked on logout', async () => {
+  const db = new PGlite();
+  let app;
+  try {
+    await migrateCatalog(db);
+    await syncCatalog(db, JSON.parse(await readFile(new URL('./fixture.json', import.meta.url), 'utf8')));
+    const env = { ENABLE_FIXTURE_DEMO: '1' };
+    app = await createCatalogApp(db, { env });
+    await app.listen(0, '127.0.0.1');
+    const origin = await app.getUrl();
+    const account = { email: 'native@example.test', password: 'fixture-password' };
+    const register = await fetch(origin + '/v1/account/register', {
+      method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' }, body: JSON.stringify(account),
+    });
+    assert.equal(register.status, 200);
+    const webToken = register.headers.get('set-cookie').split(';')[0].split('=')[1];
+    let nativeToken;
+    const client = createNativeFixtureClient(origin, async (url, options) => {
+      const response = await fetch(url, options);
+      if (url.endsWith('/login') && response.ok) nativeToken = (await response.clone().json()).token;
+      return response;
+    });
+    await assert.rejects(client.login(account.email, account.password), error => error.status === 404);
+    env.ENABLE_NATIVE_FIXTURE = '1';
+
+    const nativeSession = origin + '/v1/native/session';
+    assert.equal((await fetch(nativeSession, { headers: { Authorization: 'Bearer ' + webToken } })).status, 401);
+    assert.equal((await fetch(nativeSession, { headers: { Origin: origin } })).status, 403);
+    await assert.rejects(client.login(account.email, 'incorrect-password'), error => error.status === 401);
+    assert.equal((await client.login(account.email, account.password)).user.email, account.email);
+    assert.equal((await client.session()).user.email, account.email);
+
+    const webSession = await fetch(origin + '/v1/account/session', { headers: { Cookie: 'svb_session=' + nativeToken } });
+    assert.equal((await webSession.json()).user, null);
+    const episode = { source: 'fixture', id: 'demo-series', locale: 'en', episodeId: 'demo-1' };
+    assert.deepEqual(await client.setProgress(episode, 17), { positionSeconds: 17 });
+    assert.deepEqual(await client.progress(episode), { positionSeconds: 17 });
+    await client.logout();
+    assert.equal((await fetch(nativeSession, { headers: { Authorization: 'Bearer ' + nativeToken } })).status, 401);
+    assert.equal((await client.login(account.email, account.password)).user.email, account.email);
+    await db.query("UPDATE app_session SET expires_at = now() - interval '1 second' WHERE token_hash = $1",
+      [hashToken('native-fixture:' + nativeToken)]);
+    await assert.rejects(client.session(), error => error.status === 401);
+  } finally {
+    await app?.close();
+    await db.close();
+  }
 });

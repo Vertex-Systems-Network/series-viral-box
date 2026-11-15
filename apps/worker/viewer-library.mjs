@@ -3,11 +3,11 @@ import { sessionUser } from './accounts.mjs';
 const reply = (data, status = 200) =>
   Response.json(data, { status, headers: { 'Cache-Control': 'no-store' } });
 
-export async function viewerLibraryResponse(db, request, site) {
-  const url = new URL(request.url, site);
+export async function viewerLibraryResponse(db, request, site, native) {
+  const url = native?.url ?? new URL(request.url, site);
   const bookmark = url.pathname === '/v1/me/bookmarks';
   if (!bookmark && url.pathname !== '/v1/me/progress') return null;
-  const user = await sessionUser(db, request.headers.cookie);
+  const user = native ? native.user : await sessionUser(db, request.headers.cookie);
   if (!user) return reply({ error: 'login_required' }, 401);
   const { method } = request;
   if (method === 'GET') {
@@ -37,7 +37,7 @@ export async function viewerLibraryResponse(db, request, site) {
   if (method !== 'PUT' && !(bookmark && method === 'DELETE')) {
     return reply({ error: 'method_not_allowed' }, 405);
   }
-  if (request.headers.origin !== site) return reply({ error: 'invalid_origin' }, 403);
+  if (!native && request.headers.origin !== site) return reply({ error: 'invalid_origin' }, 403);
 
   const params = url.searchParams;
   const identity = ['source', 'titleId', 'locale', ...(bookmark ? [] : ['episodeId'])]
