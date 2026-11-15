@@ -6,6 +6,8 @@ const statuses = new Set(['discovered', 'verified', 'qualified', 'blocked']);
 const slug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const identity = ({ source, key }) => `${source}/${key}`;
 
+export const isProviderSource = row => row.source !== 'directory';
+
 export function validate(registry) {
   if (registry?.version !== 1 || !Array.isArray(registry.records)) {
     throw new Error('Expected version 1 registry and a records array');

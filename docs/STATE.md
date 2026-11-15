@@ -12,4 +12,6 @@
 
 **First task:** AUD-01. Add repeatable account browser coverage for password reset and verification using injected mail, without waiting for live credentials. Start from scripts/fixture-watch-smoke.mjs and the recovery/verification worker tests. Then take another ready item in backlog order. No production release while P0 findings remain open.
 
+**AUD-05:** [Draft PR #6](https://github.com/Vertex-Systems-Network/series-viral-box/pull/6) separates two discovery roots from 137 provider entries and compares expected titles and episodes per locale. Database export includes title-only records. Playback and download evidence remain separate. Live completeness still requires authoritative upstream exports. Next is AUD-06, private fixture origin and CDN delivery verification.
+
 **External dependencies:** Complete licensed provider inventories, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Work on fixtures, contract tests and design can proceed independently.
