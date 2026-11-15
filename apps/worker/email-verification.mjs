@@ -3,7 +3,7 @@ import { hashToken, sessionUser } from './accounts.mjs';
 
 const reply = (data, status) => Response.json(data, { status, headers: { 'Cache-Control': 'no-store' } });
 
-export async function verificationResponse(db, request, deliver) {
+export async function verificationResponse(db, request, deliver, outbox) {
   const url = new URL(request.url);
   if (request.method !== 'POST') return reply({ error: 'method_not_allowed' }, 405);
   if (request.headers.get('origin') !== url.origin) return reply({ error: 'invalid_origin' }, 403);
@@ -11,15 +11,20 @@ export async function verificationResponse(db, request, deliver) {
     const user = await sessionUser(db, request.headers.get('cookie'));
     if (!user) return reply({ error: 'login_required' }, 401);
     if (user.email_verified_at) return reply({ verified: true }, 200);
-    if (!deliver) return reply({ error: 'unavailable' }, 503);
+    if (!deliver && !outbox) return reply({ error: 'unavailable' }, 503);
     const token = randomBytes(32).toString('hex');
     const hash = hashToken(token);
-    await db.query(`INSERT INTO email_verification (user_id, token_hash, expires_at)
+    const upsert = `INSERT INTO email_verification (user_id, token_hash, expires_at)
       VALUES ($1, $2, now() + interval '30 minutes')
-      ON CONFLICT (user_id) DO UPDATE SET token_hash = EXCLUDED.token_hash, expires_at = EXCLUDED.expires_at`,
-      [user.id, hash]);
+      ON CONFLICT (user_id) DO UPDATE SET token_hash = EXCLUDED.token_hash, expires_at = EXCLUDED.expires_at
+      RETURNING user_id, token_hash, expires_at`;
     const link = new URL('/catalog', url.origin);
     link.hash = new URLSearchParams({ verify: token }).toString();
+    if (outbox) {
+      await outbox.enqueue(db, 'verify', upsert, [user.id, hash], user.email, link.href);
+      return reply({ accepted: true }, 202);
+    }
+    await db.query(upsert, [user.id, hash]);
     try {
       await deliver(user.email, link.href, 'verify');
     } catch {

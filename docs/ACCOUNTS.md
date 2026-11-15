@@ -27,7 +27,13 @@ Signed-in viewers can list or save/delete bookmarks at /v1/me/bookmarks and list
 
 ## Password recovery
 
-Configure the HTTPS AUTH_PUBLIC_ORIGIN, an absolute SENDMAIL_PATH to a compatible mail transfer agent, and RESET_MAIL_FROM. Apply the updated schema. Users can request a link from the login dialog. Reset links expire after 20 minutes, newer requests invalidate prior links, and successful reset revokes viewer sessions. The server stores token hashes. Configure deliverability on the mail host. Mail delivery is asynchronous in the loopback web service and has no durable outbox yet.
+Configure the HTTPS AUTH_PUBLIC_ORIGIN, an absolute SENDMAIL_PATH to a compatible mail transfer agent, and RESET_MAIL_FROM. Apply the updated schema. Users can request a link from the login dialog. Reset links expire after 20 minutes, newer requests invalidate prior links, and successful reset revokes viewer sessions. The server stores token hashes. Configure deliverability on the mail host. The service supports an optional durable outbox for asynchronous delivery.
+
+## Durable account mail
+
+Apply migration 004. Set the same `MAIL_OUTBOX_KEY` on the web service and mail worker, using a randomly generated 32-byte key encoded as hex. Start `node apps/worker/send-account-mail.mjs` with the configured database, HTTPS origin, sender and sendmail executable. Keep the key outside the database. Existing pending jobs require the original key, so drain the queue before rotating it.
+
+The web service writes the token hash and encrypted delivery job atomically. The worker claims due jobs, discards expired and replaced links, retries transport errors with bounded backoff, and removes successful jobs. A crash after delivery and before completion can cause a duplicate message with the same single-use link. Direct delivery remains available for existing setups without an outbox key. Live sender deliverability remains to be verified.
 
 ## Verify an email address
 

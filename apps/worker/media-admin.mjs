@@ -9,6 +9,7 @@ import { oauthSettingsResponse } from './oauth-settings.mjs';
 import { oauthResponse } from './oauth-flow.mjs';
 import { viewerLibraryResponse } from './viewer-library.mjs';
 import { recoveryResponse } from './recovery.mjs';
+import { createMailOutbox } from './account-mail-outbox.mjs';
 import { resetMailer } from './reset-mail.mjs';
 import { verificationResponse } from './email-verification.mjs';
 import pg from 'pg';
@@ -22,6 +23,8 @@ const local = process.env.MEDIA_SIGNING_KEY
 const db = new pg.Pool({ connectionString: DATABASE_URL });
 
 const deliverReset = resetMailer(process.env);
+const accountMailOutbox = process.env.MAIL_OUTBOX_KEY
+  ? createMailOutbox(process.env.MAIL_OUTBOX_KEY) : null;
 const attempts = new Map();
 const port = Number(MEDIA_ADMIN_PORT);
 const server = createServer(async (incoming, outgoing) => {
@@ -97,9 +100,9 @@ const server = createServer(async (incoming, outgoing) => {
         ...(length && incoming.method === 'POST' ? { body: Buffer.concat(chunks) } : {}),
       });
       const account = /\/(request-verification|verify-email)$/.test(url.pathname)
-        ? await verificationResponse(db, request, deliverReset)
+        ? await verificationResponse(db, request, deliverReset, accountMailOutbox)
         : url.pathname.endsWith('-password')
-        ? await recoveryResponse(db, request, deliverReset)
+        ? await recoveryResponse(db, request, deliverReset, accountMailOutbox)
         : await accountResponse(db, request, site.protocol === 'https:');
       outgoing.writeHead(account.status, Object.fromEntries(account.headers));
       return outgoing.end(Buffer.from(await account.arrayBuffer()));
