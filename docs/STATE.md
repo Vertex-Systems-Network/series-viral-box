@@ -24,3 +24,5 @@
 **Next executable task:** Decide and implement the native session transport and run device integration. Fixture tests inject an authenticated transport. Web session cookies and same-origin checks remain the web contract. Keep native offline downloads pending the product decision and rights constraints.
 
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
+
+**Active claim:** AUD-07 native fixture sign-in and session lifecycle.
