@@ -25,9 +25,10 @@
 
 **AUD-07 native media fixture:** [PR #16](https://github.com/Vertex-Systems-Network/series-viral-box/pull/16) exercises native login, real HLS and MP4 decoding, byte ranges, progress and grant rejection after logout. Run `node --test scripts/media-delivery.test.mjs`. The Media playback workflow runs the same fixture checks.
 
-**Next executable task:** Set up the Expo development build and run the fixture flow on a target device or emulator. The current workspace has no Android SDK tools or iOS simulator. Device-side playback, interruptions and download behavior still need verification. OAuth and offline distribution remain separate production scope.
+**AUD-07 Expo harness:** [PR #17](https://github.com/Vertex-Systems-Network/series-viral-box/pull/17) adds a development-only Expo app for native login, HLS playback, saved position, and temporary MP4 verification. Device setup and acceptance steps are in the root README.
+
+**Next executable task:** Run the Expo fixture on an Android emulator or USB development device and an iOS simulator. The current workspace lacks Android SDK tooling and the iOS simulator. Continue independent workspace bootstrap work while device acceptance is blocked.
 
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
-
 
 **P0-01 infrastructure checkpoint:** [PR #18](https://github.com/Vertex-Systems-Network/series-viral-box/pull/18) defines the local PostgreSQL, Redis and object storage setup and its CI round trips. Continue workspace tooling and service-shell acceptance separately. Docker is unavailable in this environment, so the live stack is checked in Actions.
