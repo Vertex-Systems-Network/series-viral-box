@@ -23,8 +23,8 @@
 
 **AUD-07 native fixture sessions:** [PR #15](https://github.com/Vertex-Systems-Network/series-viral-box/pull/15) verifies opt-in loopback sign-in, isolated bearer sessions, viewer progress, expiration and logout revocation. Production native identity and device acceptance remain open.
 
-**Next executable task:** Validate the native fixture client on actual target devices after creating the Expo integration and configuring a device-accessible development transport. The loopback fixture session endpoint is intentionally scoped to direct local testing. Production federated sign-in needs an HTTPS origin and a browser-based authorization code flow with PKCE.
+**AUD-07 native media fixture:** [PR #16](https://github.com/Vertex-Systems-Network/series-viral-box/pull/16) exercises native login, real HLS and MP4 decoding, byte ranges, progress and grant rejection after logout. Run `node --test scripts/media-delivery.test.mjs`. The Media playback workflow runs the same fixture checks.
+
+**Next executable task:** Set up the Expo development build and run the fixture flow on a target device or emulator. The current workspace has no Android SDK tools or iOS simulator. Device-side playback, interruptions and download behavior still need verification. OAuth and offline distribution remain separate production scope.
 
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
-
-**Active claim:** AUD-07 native media fixture verification.
