@@ -6,7 +6,7 @@ This table is the source of truth for task status. GitHub issues can mirror task
 | --- | --- | --- | --- |
 | P0-01 | Done | Planning PR merged | Bootstrap pnpm workspace, service shells, local Postgres/Redis/object storage, env example and CI. New checkout starts from documented commands. |
 | P0-02 | Blocked | Planning PR merged | Register all supplied ReelFren and DramaFren variants with audit status. Select fixture source and track one live source with inventory, rate limits, media and rights evidence. Fixture work can proceed independently. |
-| P1-01 | Ready | P0-01 | Create schema/migrations and seed fixtures. Prove identity uniqueness, locale variants and rights expiry. |
+| P1-01 | In progress | P0-01 | Create schema/migrations and seed fixtures. Prove identity uniqueness, locale variants and rights expiry. |
 | P1-02 | Planned | P1-01 | Implement catalog REST API and generated clients. Verify cursor pagination, provider filters and contract generation. |
 | P2-01 | Planned | P1-01 | Build adapter interface and fixture backfill/incremental sync. Verify transaction, checkpoint recovery and deletion handling. |
 | P2-02 | Planned | P2-01 | Add source health, admin resync, contract drift detection, rate-limit retries and incomplete-run protection. |
