@@ -5,7 +5,9 @@ on:
       - 'data/source-registry.json'
       - 'scripts/source-registry.mjs'
       - 'scripts/catalog-coverage.mjs'
+      - 'scripts/pilot-readiness.mjs'
       - 'data/required-sources.json'
+      - 'data/pilot-qualification.json'
       - '.github/workflows/source-registry.yml'
   workflow_dispatch:
 permissions:
@@ -20,3 +22,4 @@ jobs:
           node-version: '22'
       - run: node scripts/source-registry.mjs check data/source-registry.json
       - run: node scripts/catalog-coverage.mjs
+      - run: node scripts/pilot-readiness.mjs

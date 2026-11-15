@@ -3,11 +3,8 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.13"
   },
-  "workspaces": [
-    "apps/*"
-  ],
   "scripts": {
     "test": "node --test apps/worker/*.test.mjs",
     "sync:fixture": "node apps/worker/run.mjs"
@@ -15,5 +12,6 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.0",
     "playwright": "^1.65.1"
-  }
+  },
+  "packageManager": "pnpm@11.25.0"
 }

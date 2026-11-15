@@ -13,12 +13,12 @@ Repository for a multi-provider streaming catalog and native app.
 
 ## Run the catalog fixture
 
-With Node.js 22+ and an empty local PostgreSQL database, run:
+With Node.js 22.13 or later, pnpm 11.25.0, and an empty local PostgreSQL database, run:
 
 ```sh
-npm ci
-npm test
-DATABASE_URL=postgres://USER:PASSWORD@localhost:5432/catalog npm run sync:fixture
+pnpm install --frozen-lockfile
+pnpm test
+DATABASE_URL=postgres://USER:PASSWORD@localhost:5432/catalog pnpm run sync:fixture
 ```
 
 The fixture command applies pending SQL migrations in `db/migrations` and upserts a fictional series and its episodes. A transaction and database advisory lock protect the migration ledger. Existing databases created by the legacy `db/catalog.sql` bootstrap are adopted in place. Keep applied migration files immutable and add new numbered SQL files for schema changes. Run it twice to verify replay. The local test suite uses embedded PostgreSQL. The Catalog sync workflow exercises the CLI against PostgreSQL 17.
@@ -44,9 +44,9 @@ For the loopback fixture demo, set `ENABLE_FIXTURE_DEMO=1` alongside `MEDIA_SIGN
 
 ## Run the Next.js and NestJS catalog slice
 
-After fixture sync, start the NestJS viewer API with `DATABASE_URL=... npm run -w @series-viral-box/api start`. It defaults to loopback port 3103. In another terminal run `npm run -w @series-viral-box/web dev` and open http://127.0.0.1:3000. Use `CATALOG_API_PORT` and the Next server's `CATALOG_API_URL` to select another local upstream. The web slice lists and filters titles, pages through results, and shows episode metadata.
+After fixture sync, start the NestJS viewer API with `DATABASE_URL=... pnpm --filter @series-viral-box/api start`. It defaults to loopback port 3103. In another terminal run `pnpm --filter @series-viral-box/web dev` and open http://127.0.0.1:3000. Use `CATALOG_API_PORT` and the Next server's `CATALOG_API_URL` to select another local upstream. The web slice lists and filters titles, pages through results, and shows episode metadata.
 
-Run `npm run -w @series-viral-box/web build` and `node --test scripts/platform-parity.test.mjs` to exercise the built web app, NestJS transport and seeded catalog. The NestJS service also exposes the existing fixture viewer at `/catalog`. It uses the same account, OAuth, library and fixture-media handlers as the loopback worker. To test viewer playback, configure `ENABLE_FIXTURE_DEMO=1`, `FIXTURE_MEDIA_DIR`, and `MEDIA_SIGNING_KEY` as in [MEDIA.md](docs/MEDIA.md), and open the catalog on the NestJS origin. The Chromium fixture smoke now exercises this transport. Admin operations remain on the separate loopback media-admin service.
+Run `pnpm --filter @series-viral-box/web build` and `node --test scripts/platform-parity.test.mjs` to exercise the built web app, NestJS transport and seeded catalog. The NestJS service also exposes the existing fixture viewer at `/catalog`. It uses the same account, OAuth, library and fixture-media handlers as the loopback worker. To test viewer playback, configure `ENABLE_FIXTURE_DEMO=1`, `FIXTURE_MEDIA_DIR`, and `MEDIA_SIGNING_KEY` as in [MEDIA.md](docs/MEDIA.md), and open the catalog on the NestJS origin. The Chromium fixture smoke now exercises this transport. Admin operations remain on the separate loopback media-admin service.
 
 For a same-origin fixture, set `VIEWER_PUBLIC_ORIGIN=http://127.0.0.1:3000` on Next.js and `AUTH_PUBLIC_ORIGIN=http://127.0.0.1:3000` on NestJS. Keep `CATALOG_API_URL` set to the private NestJS origin. Open `/catalog` on the Next.js origin. Next.js forwards the viewer APIs, fixture watch page and signed media while preserving origin, cookies and range semantics. Configure an HTTPS public origin and real credentials for live OAuth. The operator interface is served separately by the loopback media-admin process. After building Next.js, run `node scripts/fixture-watch-smoke.mjs --next` to verify playback, progress and account recovery through the combined transport.
 
@@ -71,6 +71,6 @@ Device success requires a native build and emulator or hardware. The JavaScript 
 
 ## Local dependency stack
 
-Copy `.env.example` to `.env` and run `docker compose up -d --wait` from the repo root. Compose starts PostgreSQL, Redis and an S3-compatible local object store with loopback-only ports and persistent volumes. Load the example values into your shell with `set -a; source .env; set +a` before running `npm ci` and `npm run sync:fixture`. Keep connection URLs aligned if you change ports or credentials.
+Copy `.env.example` to `.env` and run `docker compose up -d --wait` from the repo root. Compose starts PostgreSQL, Redis and an S3-compatible local object store with loopback-only ports and persistent volumes. Load the example values into your shell with `set -a; source .env; set +a` before running `pnpm install --frozen-lockfile` and `pnpm run sync:fixture`. Keep connection URLs aligned if you change ports or credentials.
 
 Local disk stays the default media store. For the S3 fixture path, use the AWS CLI with `FIXTURE_S3_ENDPOINT` to create the private bucket named by `FIXTURE_MEDIA_BUCKET`, then follow [MEDIA.md](docs/MEDIA.md). Unset `FIXTURE_MEDIA_BUCKET` for local disk publication. Redis is available for queue development. The current sync worker still uses PostgreSQL for checkpoints. Run `docker compose down` to stop the stack and retain fixture data.
