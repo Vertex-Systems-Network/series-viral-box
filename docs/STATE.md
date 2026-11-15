@@ -19,8 +19,8 @@
 
 **AUD-07 same-origin fixture:** [PR #13](https://github.com/Vertex-Systems-Network/series-viral-box/pull/13) connects the existing viewer catalog and media routes through the Next.js origin. The built-app parity test verifies a session cookie round trip, cross-origin mutation rejection, a signed download range, HEAD semantics, and admin isolation.
 
-**Next executable task:** Start native client contracts for signed playback, progress and download after the Chromium viewer lifecycle passes on [PR #13](https://github.com/Vertex-Systems-Network/series-viral-box/pull/13). Design remains separate. Production provider credentials and device acceptance still need external verification.
+**AUD-07 native client:** [PR #14](https://github.com/Vertex-Systems-Network/series-viral-box/pull/14) adds a platform-neutral catalog and fixture viewer client. Tests cover paging cursor preservation, title episodes, progress, the signed playback and download contracts, and foreign or mismatched grant rejection.
+
+**Next executable task:** Decide and implement the native session transport and run device integration. Fixture tests inject an authenticated transport. Web session cookies and same-origin checks remain the web contract. Keep native offline downloads pending the product decision and rights constraints.
 
 **External dependencies:** Licensed provider inventories and distribution rights, deployable public HTTPS origin, Google/Apple credentials, configured sender and CDN/bucket access. Review [AUDIT.md](AUDIT.md) before any production release.
-
-**Active claim:** AUD-07 native fixture client contract on `codex/aud-07-native-client`.
